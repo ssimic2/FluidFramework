@@ -16,6 +16,10 @@ export interface IWebResolvedUrl extends IResolvedUrlBase {
     data: string;
 }
 
+export interface IPackageInfo {
+    name: string;
+}
+
 export interface IFluidResolvedUrl extends IResolvedUrlBase {
     type: "fluid";
     /**
@@ -38,7 +42,7 @@ export interface IUrlResolver {
     getAbsoluteUrl(
         resolvedUrl: IResolvedUrl,
         relativeUrl: string,
-        codeDetails?: IFluidCodeDetails,
+        codeDetails?: IFluidCodeDetails | IPackageInfo,
     ): Promise<string>;
 }
 

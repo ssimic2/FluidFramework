@@ -221,6 +221,12 @@ export interface IGenericNetworkError extends IDriverErrorBase {
 }
 
 // @public (undocumented)
+export interface IPackageInfo {
+    // (undocumented)
+    name: string;
+}
+
+// @public (undocumented)
 export type IResolvedUrl = IWebResolvedUrl | IFluidResolvedUrl;
 
 // @public (undocumented)
@@ -262,7 +268,7 @@ export interface IThrottlingWarning extends IDriverErrorBase {
 // @public (undocumented)
 export interface IUrlResolver {
     // (undocumented)
-    getAbsoluteUrl(resolvedUrl: IResolvedUrl, relativeUrl: string, codeDetails?: IFluidCodeDetails): Promise<string>;
+    getAbsoluteUrl(resolvedUrl: IResolvedUrl, relativeUrl: string, codeDetails?: IFluidCodeDetails | IPackageInfo): Promise<string>;
     // (undocumented)
     resolve(request: IRequest): Promise<IResolvedUrl | undefined>;
 }
