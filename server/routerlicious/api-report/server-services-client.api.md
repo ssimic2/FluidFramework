@@ -18,6 +18,10 @@ import { IUser } from '@fluidframework/protocol-definitions';
 import * as resources from '@fluidframework/gitresources';
 import { ScopeType } from '@fluidframework/protocol-definitions';
 import { SummaryObject } from '@fluidframework/protocol-definitions';
+import { SummaryType } from '@fluidframework/protocol-definitions';
+
+// @public (undocumented)
+export function addBlobToSummary(summary: ISummaryTree, key: string, content: string | Uint8Array): void;
 
 // @public (undocumented)
 export class BasicRestWrapper extends RestWrapper {
@@ -25,6 +29,9 @@ export class BasicRestWrapper extends RestWrapper {
     // (undocumented)
     protected request<T>(requestConfig: AxiosRequestConfig, statusCode: number, canRetry?: boolean): Promise<T>;
 }
+
+// @public (undocumented)
+export const bufferToString: (blob: ArrayBufferLike, encoding: string) => string;
 
 // @public
 export const buildTreePath: (...nodeNames: string[]) => string;
@@ -41,11 +48,17 @@ export const canWrite: (scopes: string[]) => boolean;
 // @public (undocumented)
 export const choose: () => string;
 
+// @public (undocumented)
+export function convertSnapshotTreeToSummaryTree(snapshot: ISnapshotTree, blobs: Map<string, ArrayBuffer>): ISummaryTree;
+
 // @public
 export function convertSummaryTreeToWholeSummaryTree(parentHandle: string | undefined, tree: ISummaryTree, path?: string, rootNodeName?: string): IWholeSummaryTree;
 
 // @public
 export function convertWholeFlatSummaryToSnapshotTreeAndBlobs(flatSummary: IWholeFlatSummary): INormalizedWholeSummary;
+
+// @public (undocumented)
+export function convertWholeFlatSummaryToSummaryTree(flatSummary: IWholeFlatSummary): ISummaryTree;
 
 // @public
 export function createFluidServiceNetworkError(statusCode: number, errorData?: INetworkErrorDetails | string): NetworkError;
@@ -519,6 +532,22 @@ export abstract class RestWrapper {
     // (undocumented)
     protected abstract request<T>(options: AxiosRequestConfig, statusCode: number): Promise<T>;
 }
+
+// @public (undocumented)
+export class SummaryTreeBuilder {
+    // (undocumented)
+    add(key: string, summary: ISummaryTree): void;
+    // (undocumented)
+    addAttachment(id: string): void;
+    // (undocumented)
+    addBlob(key: string, content: string | Uint8Array): void;
+    // (undocumented)
+    addHandle(key: string, handleType: SummaryType.Tree | SummaryType.Blob | SummaryType.Attachment, handle: string): void;
+    // (undocumented)
+    getSummaryTree(): ISummaryTree;
+    // (undocumented)
+    get summary(): ISummaryTree;
+    }
 
 // @public
 export class SummaryTreeUploadManager implements ISummaryUploadManager {

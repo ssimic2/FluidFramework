@@ -47,7 +47,8 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     get disposed(): boolean;
     get initialObjects(): Record<string, IFluidLoadable>;
     get isDirty(): boolean;
-    }
+    get serialize(): () => string;
+}
 
 // @public
 export interface IConnection {
@@ -65,6 +66,7 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
     readonly disposed: boolean;
     readonly initialObjects: LoadableObjectRecord;
     readonly isDirty: boolean;
+    serialize(): string;
 }
 
 // @public

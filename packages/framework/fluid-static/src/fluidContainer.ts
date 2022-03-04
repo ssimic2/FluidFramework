@@ -112,6 +112,7 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
      * When loading an existing container, it will already be attached.
      */
     readonly attachState: AttachState;
+    
 
     /**
      * A newly created container starts detached from the collaborative service.  Calling attach() uploads the
@@ -127,6 +128,13 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
      * @param objectClass - The class of data object or DDS to create
      */
     create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
+
+    /**
+     * A newly created container starts detached from the collaborative service.  Calling attach() uploads the
+     * new container to the service and connects to the collaborative service.
+     * @returns A promise which resolves when the attach is complete, with the string identifier of the container.
+     */
+    serialize(): string;
 
     /**
      * Dispose of the container instance, permanently disabling it.
@@ -183,6 +191,13 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     public get connected() {
         return this.container.connected;
     }
+
+        /**
+     * {@inheritDoc IFluidContainer.connected}
+     */
+         public get serialize() {
+            return this.container.serialize;
+        }
 
     /**
      * {@inheritDoc IFluidContainer.initialObjects}

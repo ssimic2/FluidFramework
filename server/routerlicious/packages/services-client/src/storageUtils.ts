@@ -3,9 +3,9 @@
  * Licensed under the MIT License.
  */
 
-import { assert, stringToBuffer, Uint8ArrayToString, unreachableCase } from "@fluidframework/common-utils";
+import { assert, IsoBuffer, stringToBuffer, Uint8ArrayToString, unreachableCase } from "@fluidframework/common-utils";
 import { getGitType } from "@fluidframework/protocol-base";
-import { ISnapshotTree, SummaryType } from "@fluidframework/protocol-definitions";
+import { ISnapshotTree, ISummaryBlob, SummaryObject, SummaryType } from "@fluidframework/protocol-definitions";
 import {
     ISummaryTree,
     IWholeSummaryTree,
@@ -196,4 +196,96 @@ export function convertWholeFlatSummaryToSnapshotTreeAndBlobs(
         snapshotTree,
         sequenceNumber,
     };
+}
+
+export function convertWholeFlatSummaryToSummaryTree(
+    flatSummary: IWholeFlatSummary,
+): ISummaryTree {
+    const {blobs, snapshotTree} = convertWholeFlatSummaryToSnapshotTreeAndBlobs(flatSummary);
+    return convertSnapshotTreeToSummaryTree(snapshotTree, blobs);
+}
+
+
+export const bufferToString = (blob: ArrayBufferLike, encoding: string): string =>
+    IsoBuffer.from(blob).toString(encoding);
+
+export function convertSnapshotTreeToSummaryTree(
+    snapshot: ISnapshotTree,
+    blobs: Map<string, ArrayBuffer>
+): ISummaryTree {
+    assert(Object.keys(snapshot.commits).length === 0,
+        0x19e /* "There should not be commit tree entries in snapshot" */);
+
+    const builder = new SummaryTreeBuilder();
+    for (const [path, id] of Object.entries(snapshot.blobs)) {
+        const blob = blobs.get(id);
+        if (blob !== undefined) {
+            builder.addBlob(path, bufferToString(blob, "utf-8"));
+        }
+    }
+
+    for (const [key, tree] of Object.entries(snapshot.trees)) {
+        const subtree = convertSnapshotTreeToSummaryTree(tree, blobs);
+        builder.add(key, subtree);
+    }
+
+    const summaryTree = builder.getSummaryTree();
+    summaryTree.unreferenced = snapshot.unreferenced;
+    return summaryTree;
+}
+
+
+
+export function addBlobToSummary(summary: ISummaryTree, key: string, content: string | Uint8Array): void {
+    const blob: ISummaryBlob = {
+        type: SummaryType.Blob,
+        content,
+    };
+    summary.tree[key] = blob;
+}
+
+export class SummaryTreeBuilder {
+    private attachmentCounter: number = 0;
+
+    public get summary(): ISummaryTree {
+        return {
+            type: SummaryType.Tree,
+            tree: { ...this.summaryTree },
+        };
+    }
+
+    private readonly summaryTree: { [path: string]: SummaryObject } = {};
+
+    public addBlob(key: string, content: string | Uint8Array): void {
+        // Prevent cloning by directly referencing underlying private properties
+        addBlobToSummary(
+            {
+                type: SummaryType.Tree,
+                tree: this.summaryTree,
+            }, key, content);
+    }
+
+    public addHandle(
+        key: string,
+        handleType: SummaryType.Tree | SummaryType.Blob | SummaryType.Attachment,
+        handle: string): void
+    {
+        this.summaryTree[key] = {
+            type: SummaryType.Handle,
+            handleType,
+            handle,
+        };
+    }
+
+    public add(key: string, summary: ISummaryTree): void {
+        this.summaryTree[key] = summary;
+    }
+
+    public addAttachment(id: string) {
+        this.summaryTree[this.attachmentCounter++] = { id, type: SummaryType.Attachment };
+    }
+
+    public getSummaryTree(): ISummaryTree {
+        return this.summary;
+    }
 }

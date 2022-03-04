@@ -34,9 +34,14 @@
     "webpack:dev": "webpack --env.development"
   },
   "dependencies": {
+    "@fluidframework/driver-definitions": "^0.45.0-0",
+    "@fluidframework/driver-utils": "^0.58.0",
+    "@fluidframework/routerlicious-driver": "^0.58.0",
+    "@fluidframework/routerlicious-urlresolver": "^0.58.0",
     "@fluidframework/azure-client": "^0.58.0",
     "@fluidframework/common-definitions": "^0.20.1",
     "@fluidframework/test-client-utils": "^0.58.0",
+    "@fluidframework/runtime-utils": "^0.58.0",
     "fluid-framework": "^0.58.0"
   },
   "devDependencies": {

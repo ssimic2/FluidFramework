@@ -6,6 +6,7 @@
 import type { ITelemetryLogger } from "@fluidframework/common-definitions";
 import {
     assert,
+    IsoBuffer,
     stringToBuffer,
     Uint8ArrayToString,
 } from "@fluidframework/common-utils";
@@ -17,15 +18,19 @@ import {
 import {
     ICreateBlobResponse,
     ISnapshotTree,
+    ISummaryBlob,
     ISummaryHandle,
     ISummaryTree,
     ITree,
     IVersion,
+    SummaryObject,
+    SummaryType,
 } from "@fluidframework/protocol-definitions";
 import {
     convertWholeFlatSummaryToSnapshotTreeAndBlobs,
     GitManager,
     ISummaryUploadManager,
+    IWholeFlatSummary,
     WholeSummaryUploadManager,
 } from "@fluidframework/server-services-client";
 import { PerformanceEvent } from "@fluidframework/telemetry-utils";
@@ -53,8 +58,8 @@ export class WholeSummaryDocumentStorageService implements IDocumentStorageServi
     }
 
     public async getVersions(versionId: string | null, count: number): Promise<IVersion[]> {
-        if (versionId !== this.id && versionId !== null) {
-            // Blobs/Trees in this scenario will never have multiple versions, so return versionId as is
+        if (versionId !== this.id && versionId) {
+            // Blobs in this scenario will never have multiple versions, so return blobId as is
             return [{
                 id: versionId,
                 treeId: undefined!,
@@ -142,7 +147,10 @@ export class WholeSummaryDocumentStorageService implements IDocumentStorageServi
     }
 
     public async downloadSummary(handle: ISummaryHandle): Promise<ISummaryTree> {
-        throw new Error("NOT IMPLEMENTED!");
+        // throw new Error("NOT IMPLEMENTED!");
+        const versions = await this.getVersions(this.id, 1);
+        const requestVersion = versions[0];
+        return await this.fetchSummaryTree(requestVersion.id);
     }
 
     public async write(tree: ITree, parents: string[], message: string, ref: string): Promise<IVersion> {
@@ -219,11 +227,117 @@ export class WholeSummaryDocumentStorageService implements IDocumentStorageServi
         return snapshotTreeVersion;
     }
 
+    private async fetchSummaryTree(versionId: string): Promise<ISummaryTree> {
+        const wholeFlatSummary = await PerformanceEvent.timedExecAsync(
+            this.logger,
+            {
+                eventName: "getWholeFlatSummary",
+                treeId: versionId,
+            },
+            async (event) => {
+                const response = await this.manager.getSummary(versionId);
+                event.end({
+                    size: response.trees[0]?.entries.length,
+                });
+                return response;
+            },
+        );
+        return this.convertWholeFlatSummaryToSummaryTree(wholeFlatSummary);
+    }
+
     private async initBlobCache(blobs: Map<string, ArrayBuffer>): Promise<void> {
         const blobCachePutPs: Promise<void>[] = [];
         blobs.forEach((value, id) => {
             blobCachePutPs.push(this.blobCache.put(id, value));
         });
         await Promise.all(blobCachePutPs);
+    }
+
+    private convertWholeFlatSummaryToSummaryTree(
+        flatSummary: IWholeFlatSummary,
+    ): ISummaryTree {
+        const {blobs, snapshotTree} = convertWholeFlatSummaryToSnapshotTreeAndBlobs(flatSummary);
+        return convertSnapshotTreeToSummaryTree(snapshotTree, blobs);
+    }
+}
+
+export const bufferToString = (blob: ArrayBufferLike, encoding: string): string =>
+    IsoBuffer.from(blob).toString(encoding);
+
+export function convertSnapshotTreeToSummaryTree(
+    snapshot: ISnapshotTree,
+    blobs: Map<string, ArrayBuffer>
+    ): ISummaryTree {
+    assert(Object.keys(snapshot.commits).length === 0,
+        0x19e /* "There should not be commit tree entries in snapshot" */);
+
+    const builder = new SummaryTreeBuilder();
+    for (const [path, id] of Object.entries(snapshot.blobs)) {
+        const blob = blobs.get(id);
+        if (blob !== undefined) {
+            builder.addBlob(path, bufferToString(blob, "utf-8"));
+        }
+    }
+
+    for (const [key, tree] of Object.entries(snapshot.trees)) {
+        const subtree = convertSnapshotTreeToSummaryTree(tree, blobs);
+        builder.add(key, subtree);
+    }
+
+    const summaryTree = builder.getSummaryTree();
+    summaryTree.unreferenced = snapshot.unreferenced;
+    return summaryTree;
+}
+
+function addBlobToSummary(summary: ISummaryTree, key: string, content: string | Uint8Array): void {
+    const blob: ISummaryBlob = {
+        type: SummaryType.Blob,
+        content,
+    };
+    summary.tree[key] = blob;
+}
+class SummaryTreeBuilder {
+    private attachmentCounter: number = 0;
+
+    public get summary(): ISummaryTree {
+        return {
+            type: SummaryType.Tree,
+            tree: { ...this.summaryTree },
+        };
+    }
+
+    private readonly summaryTree: { [path: string]: SummaryObject } = {};
+
+    public addBlob(key: string, content: string | Uint8Array): void {
+        // Prevent cloning by directly referencing underlying private properties
+        addBlobToSummary(
+            {
+                type: SummaryType.Tree,
+                tree: this.summaryTree,
+            }, key, content);
+    }
+
+    public addHandle(
+        key: string,
+        handleType: SummaryType.Tree | SummaryType.Blob | SummaryType.Attachment,
+        handle: string): void
+    {
+        this.summaryTree[key] = {
+            type: SummaryType.Handle,
+            handleType,
+            handle,
+        };
+    }
+
+    public add(key: string, summary: ISummaryTree): void {
+        this.summaryTree[key] = summary;
+    }
+
+    public addAttachment(id: string) {
+        this.summaryTree[this.attachmentCounter++] = { id, type: SummaryType.Attachment };
+    }
+
+    public getSummaryTree(): ISummaryTree {
+        return this.summary;
     }
 }

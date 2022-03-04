@@ -7,7 +7,7 @@ import {
     AzureClient,
     AzureConnectionConfig,
     AzureContainerServices,
-    LOCAL_MODE_TENANT_ID,
+    // LOCAL_MODE_TENANT_ID,
 } from "@fluidframework/azure-client";
 import {
     generateTestUser,
@@ -20,38 +20,53 @@ import {
 import { DiceRollerController } from "./controller";
 import { makeAppView } from "./view";
 
+import { fluidFetchInit } from "./fluidFetchInit";
+import {
+    fluidFetchSnapshotVersions,
+    fetchBlobsFromVersion,
+    fetchSummaryFromVersion
+  } from "./fluidFetchSnapshot";
+
 export interface ICustomUserDetails {
     gender: string;
     email: string;
 }
 
-const userDetails: ICustomUserDetails = {
-    gender: "female",
-    email: "xyz@microsoft.com",
-};
+const fluidUrl =
+  "https://alfred.westus2.fluidrelay.azure.com/?storage=https://historian.westus2.fluidrelay.azure.com";
+const tenantId = "1e298c52-acdc-49ad-baf7-b2516d555fe7";
+const containerId = "8432e8ec-03d8-4694-8493-8de7673b78d6";
+
+// const userDetails: ICustomUserDetails = {
+//     gender: "female",
+//     email: "xyz@microsoft.com",
+// };
 
 // Define the server we will be using and initialize Fluid
 const useAzure = process.env.FLUID_CLIENT === "azure";
 
 const user = generateTestUser();
 
-const azureUser = {
-    userId: user.id,
-    userName: user.name,
-    additionalDetails: userDetails,
+export const userConfig = {
+    id: user.id,
+    name: user.name,
 };
 
 const connectionConfig: AzureConnectionConfig = useAzure ? {
-    tenantId: "",
-    tokenProvider: new AzureFunctionTokenProvider("", azureUser),
-    orderer: "",
-    storage: "",
+    tenantId: "1e298c52-acdc-49ad-baf7-b2516d555fe7",
+    tokenProvider: 
+        new AzureFunctionTokenProvider(
+            "https://ssazuretokengen.azurewebsites.net/api/GetFrsToken", { 
+                userId: "test-user", userName: "Test User" }),
+    orderer: "https://alfred.westus2.fluidrelay.azure.com",
+    storage: "https://historian.westus2.fluidrelay.azure.com",
 } : {
-    tenantId: LOCAL_MODE_TENANT_ID,
-    tokenProvider: new InsecureTokenProvider("fooBar", user),
-    orderer: "http://localhost:7070",
-    storage: "http://localhost:7070",
+    tenantId: "1e298c52-acdc-49ad-baf7-b2516d555fe7",
+    tokenProvider: new InsecureTokenProvider("5f9d1943796b6d248041950aa2c1d7dc", userConfig),
+    orderer: "https://alfred.westus2.fluidrelay.azure.com",
+    storage: "https://historian.westus2.fluidrelay.azure.com",
 };
+
 
 // Define the schema of our Container.
 // This includes the DataObjects we support and any initial DataObjects we want created
@@ -105,6 +120,21 @@ async function start(): Promise<void> {
         // collaboration session.
         ({container, services} = await client.getContainer(id, containerSchema));
     }
+
+
+    const docService = await fluidFetchInit(
+        `${fluidUrl}&tenantId=${tenantId}&containerId=${containerId}`
+      );
+
+    const data = await fluidFetchSnapshotVersions(docService);
+    console.log("Data", data)
+
+    const tree = await fetchBlobsFromVersion(docService);
+    console.log("Tree", tree)
+
+    const tree1 = await fetchSummaryFromVersion(docService);
+    console.log("Tree1", tree1)
+
 
     document.title = id;
 
