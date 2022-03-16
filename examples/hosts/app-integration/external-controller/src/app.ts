@@ -135,6 +135,18 @@ async function start(): Promise<void> {
     const tree1 = await fetchSummaryFromVersion(docService);
     console.log("Tree1", tree1)
 
+    const { container: testContainer } = await client.createContainer(containerSchema);
+    const newTree = JSON.parse(((testContainer as any).container.serialize()))
+    console.log("newTree1", newTree)
+
+    newTree.tree[".app"].tree[".channels"] = (tree1 as any).tree[".app"].tree[".channels"];
+    console.log("newTree2", newTree)
+
+    const { container: newContainer } = await client.createContainerFromSummary(containerSchema, JSON.stringify(newTree))
+    console.log("c-------", newContainer)
+    const newId = await newContainer.attach();
+    console.log("newId-------", newId)
+
 
     document.title = id;
 

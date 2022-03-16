@@ -101,6 +101,47 @@ export class AzureClient {
     }
 
     /**
+     * Creates a new detached container instance in the Azure Fluid Relay.
+     * @param containerSchema - Container schema for the new container.
+     * @returns New detached container instance along with associated services.
+     */
+         public async createContainerFromSummary(
+            containerSchema: ContainerSchema,
+            snapshotTree: string,
+        ): Promise<{
+            container: IFluidContainer;
+            services: AzureContainerServices;
+        }> {
+            const loader = this.createLoader(containerSchema);
+            const container = await loader.rehydrateDetachedContainerFromSnapshot(snapshotTree);
+            const rootDataObject = await requestFluidObject<RootDataObject>(
+                container,
+                "/",
+            );
+            const createNewRequest = createAzureCreateNewRequest(
+                this.props.connection.orderer,
+                this.props.connection.storage,
+                this.props.connection.tenantId,
+            );
+            const fluidContainer = new (class extends FluidContainer {
+                async attach() {
+                    if (this.attachState !== AttachState.Detached) {
+                        throw new Error(
+                            "Cannot attach container. Container is not in detached state",
+                        );
+                    }
+                    await container.attach(createNewRequest);
+                    const resolved = container.resolvedUrl;
+                    ensureFluidResolvedUrl(resolved);
+                    return resolved.id;
+                }
+            })(container, rootDataObject);
+    
+            const services = this.getContainerServices(container);
+            return { container: fluidContainer, services };
+        }
+
+    /**
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.
      * @param id - Unique ID of the container in Azure Fluid Relay.
      * @param containerSchema - Container schema used to access data objects in the container.

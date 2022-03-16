@@ -31,6 +31,10 @@ export class AzureClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }>;
+    createContainerFromSummary(containerSchema: ContainerSchema, snapshotTree: string): Promise<{
+        container: IFluidContainer;
+        services: AzureContainerServices;
+    }>;
     getContainer(id: string, containerSchema: ContainerSchema): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
