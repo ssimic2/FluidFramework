@@ -14,17 +14,17 @@ import * as r11s from "@fluidframework/routerlicious-driver";
 import { RouterliciousUrlResolver } from "@fluidframework/routerlicious-urlresolver";
 
 export const latestVersionsId: string = "";
-export let connectionInfo: any;
+// export let connectionInfo: any;
 
 export let paramJWT: string;
 export const paramAzureKey: string = "5f9d1943796b6d248041950aa2c1d7dc";
 
 async function initializeAzure(resolvedUrl: IFluidResolvedUrl, tenantId: string) {
-    connectionInfo = {
-        server: resolvedUrl.endpoints.ordererUrl,
-        tenantId,
-        id: resolvedUrl.id,
-    };
+    // connectionInfo = {
+    //     server: resolvedUrl.endpoints.ordererUrl,
+    //     tenantId,
+    //     id: resolvedUrl.id,
+    // };
     
     console.log(`Connecting to Azure Fluid Relay: tenantId=${tenantId} id:${resolvedUrl.id}`);
     const user = generateTestUser();

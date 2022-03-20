@@ -15,6 +15,7 @@ import { ITokenClaims } from '@fluidframework/protocol-definitions';
 import { ITokenProvider } from '@fluidframework/routerlicious-driver';
 import { ITokenResponse } from '@fluidframework/routerlicious-driver';
 import { IUser } from '@fluidframework/protocol-definitions';
+import { IVersion } from '@fluidframework/protocol-definitions';
 import { ScopeType } from '@fluidframework/protocol-definitions';
 import { ServiceAudience } from '@fluidframework/fluid-static';
 
@@ -31,11 +32,14 @@ export class AzureClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }>;
-    createContainerFromSummary(containerSchema: ContainerSchema, snapshotTree: string): Promise<{
+    getContainer(id: string, containerSchema: ContainerSchema): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }>;
-    getContainer(id: string, containerSchema: ContainerSchema): Promise<{
+    // (undocumented)
+    getContainerVersions(id: string, maxCount: number): Promise<IVersion[]>;
+    // (undocumented)
+    recreateContainerFromVersion(id: string, containerSchema: ContainerSchema, version?: IVersion): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }>;

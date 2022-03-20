@@ -25,6 +25,11 @@ import {
     AzureUrlResolver,
     createAzureCreateNewRequest,
 } from "./AzureUrlResolver";
+import {
+    ISummaryTree,
+    IVersion,
+    SummaryType,
+} from "@fluidframework/protocol-definitions";
 
 /**
  * Strongly typed id for connecting to a local Azure Fluid Relay.
@@ -100,46 +105,118 @@ export class AzureClient {
         return { container: fluidContainer, services };
     }
 
+    public async getContainerVersions(id: string, maxCount: number): Promise<IVersion[]> {
+        const url = new URL(this.props.connection.orderer);
+        url.searchParams.append("storage", encodeURIComponent(this.props.connection.storage));
+        url.searchParams.append("tenantId", encodeURIComponent(this.props.connection.tenantId));
+        url.searchParams.append("containerId", encodeURIComponent(id));
+
+        const resolvedUrl = await this.urlResolver.resolve({ url: url.href });
+        if (!resolvedUrl) {
+            throw new Error(
+                "Unable to resolved URL",
+            );
+        }
+        const documentService = await this.documentServiceFactory.createDocumentService(resolvedUrl);
+        const storage = await documentService.connectToStorage();
+        return await storage.getVersions(null, maxCount);
+    }
+
+    public async recreateContainerFromVersion(id: string, containerSchema: ContainerSchema, version?: IVersion): Promise<{
+        container: IFluidContainer;
+        services: AzureContainerServices;
+    }> {
+        const versionID = version?.id
+        if (!versionID) {
+            throw new Error(
+                "Invalid version ID1",
+            );
+        }
+
+        const url = new URL(this.props.connection.orderer);
+        url.searchParams.append("storage", encodeURIComponent(this.props.connection.storage));
+        url.searchParams.append("tenantId", encodeURIComponent(this.props.connection.tenantId));
+        url.searchParams.append("containerId", encodeURIComponent(id));
+
+        const resolvedUrl = await this.urlResolver.resolve({ url: url.href });
+        if (!resolvedUrl) {
+            throw new Error(
+                "Unable to resolved URL",
+            );
+        }
+        const documentService = await this.documentServiceFactory.createDocumentService(resolvedUrl);
+        const storage = await documentService.connectToStorage();
+
+        const handle = {
+            type: SummaryType.Handle,
+            handleType: SummaryType.Tree,
+            handle: version?.id as string
+        }
+
+        const tree = await storage.downloadSummary(handle);
+        if (!tree) {
+            return Promise.reject(new Error("Failed to load snapshot tree"));
+        }
+
+        const sanitizedTree = await this.sanitizeSummary(tree, containerSchema);
+
+        return await this.createContainerFromSummary(containerSchema, JSON.stringify(sanitizedTree))
+    }
+
+
+    private async sanitizeSummary(summaryTree: ISummaryTree, containerSchema: ContainerSchema): Promise<ISummaryTree> {
+        // Note: This is temp. hack. We need proper sanitization of the existing summary, before PR-ing
+        const { container: replacementContainer } = await this.createContainer(containerSchema);
+
+        
+        const newTree = JSON.parse(((replacementContainer as any).container.serialize()))
+    
+        newTree.tree[".app"].tree[".channels"] = (summaryTree as any).tree[".app"].tree[".channels"];
+
+        return newTree;
+    }
+
     /**
      * Creates a new detached container instance in the Azure Fluid Relay.
      * @param containerSchema - Container schema for the new container.
      * @returns New detached container instance along with associated services.
      */
-         public async createContainerFromSummary(
-            containerSchema: ContainerSchema,
-            snapshotTree: string,
-        ): Promise<{
-            container: IFluidContainer;
-            services: AzureContainerServices;
-        }> {
-            const loader = this.createLoader(containerSchema);
-            const container = await loader.rehydrateDetachedContainerFromSnapshot(snapshotTree);
-            const rootDataObject = await requestFluidObject<RootDataObject>(
-                container,
-                "/",
-            );
-            const createNewRequest = createAzureCreateNewRequest(
-                this.props.connection.orderer,
-                this.props.connection.storage,
-                this.props.connection.tenantId,
-            );
-            const fluidContainer = new (class extends FluidContainer {
-                async attach() {
-                    if (this.attachState !== AttachState.Detached) {
-                        throw new Error(
-                            "Cannot attach container. Container is not in detached state",
-                        );
-                    }
-                    await container.attach(createNewRequest);
-                    const resolved = container.resolvedUrl;
-                    ensureFluidResolvedUrl(resolved);
-                    return resolved.id;
+    private async createContainerFromSummary(
+        containerSchema: ContainerSchema,
+        snapshotTree: string,
+    ): Promise<{
+        container: IFluidContainer;
+        services: AzureContainerServices;
+    }> {
+        const loader = this.createLoader(containerSchema);
+        const container = await loader.rehydrateDetachedContainerFromSnapshot(snapshotTree);
+        const rootDataObject = await requestFluidObject<RootDataObject>(
+            container,
+            "/",
+        );
+        const createNewRequest = createAzureCreateNewRequest(
+            this.props.connection.orderer,
+            this.props.connection.storage,
+            this.props.connection.tenantId,
+        );
+        const fluidContainer = new (class extends FluidContainer {
+            async attach() {
+                if (this.attachState !== AttachState.Detached) {
+                    throw new Error(
+                        "Cannot attach container. Container is not in detached state",
+                    );
                 }
-            })(container, rootDataObject);
-    
-            const services = this.getContainerServices(container);
-            return { container: fluidContainer, services };
-        }
+                await container.attach(createNewRequest);
+                const resolved = container.resolvedUrl;
+                ensureFluidResolvedUrl(resolved);
+                return resolved.id;
+            }
+        })(container, rootDataObject);
+
+        const services = this.getContainerServices(container);
+        return { container: fluidContainer, services };
+    }
+
 
     /**
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.

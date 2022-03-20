@@ -45,7 +45,7 @@ export class DocumentStorageService extends DocumentStorageServiceProxy {
                 logger,
                 policies,
                 blobCache,
-                snapshotTreeCache,
+                // snapshotTreeCache,
             ) :
             new ShreddedSummaryDocumentStorageService(
                 id,

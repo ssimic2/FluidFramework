@@ -34,8 +34,8 @@ export interface ICustomUserDetails {
 
 const fluidUrl =
   "https://alfred.westus2.fluidrelay.azure.com/?storage=https://historian.westus2.fluidrelay.azure.com";
-const tenantId = "1e298c52-acdc-49ad-baf7-b2516d555fe7";
-const containerId = "8432e8ec-03d8-4694-8493-8de7673b78d6";
+const tenantId = "tenantId";
+const containerId = "containerId";
 
 // const userDetails: ICustomUserDetails = {
 //     gender: "female",
@@ -53,7 +53,7 @@ export const userConfig = {
 };
 
 const connectionConfig: AzureConnectionConfig = useAzure ? {
-    tenantId: "1e298c52-acdc-49ad-baf7-b2516d555fe7",
+    tenantId: "tenantId",
     tokenProvider: 
         new AzureFunctionTokenProvider(
             "https://ssazuretokengen.azurewebsites.net/api/GetFrsToken", { 
@@ -61,8 +61,8 @@ const connectionConfig: AzureConnectionConfig = useAzure ? {
     orderer: "https://alfred.westus2.fluidrelay.azure.com",
     storage: "https://historian.westus2.fluidrelay.azure.com",
 } : {
-    tenantId: "1e298c52-acdc-49ad-baf7-b2516d555fe7",
-    tokenProvider: new InsecureTokenProvider("5f9d1943796b6d248041950aa2c1d7dc", userConfig),
+    tenantId: "tenantId",
+    tokenProvider: new InsecureTokenProvider("tenantKey", userConfig),
     orderer: "https://alfred.westus2.fluidrelay.azure.com",
     storage: "https://historian.westus2.fluidrelay.azure.com",
 };
@@ -129,8 +129,8 @@ async function start(): Promise<void> {
     const data = await fluidFetchSnapshotVersions(docService);
     console.log("Data", data)
 
-    const tree = await fetchBlobsFromVersion(docService);
-    console.log("Tree", tree)
+    //const tree = await fetchBlobsFromVersion(docService);
+    //console.log("Tree", tree)
 
     const tree1 = await fetchSummaryFromVersion(docService);
     console.log("Tree1", tree1)

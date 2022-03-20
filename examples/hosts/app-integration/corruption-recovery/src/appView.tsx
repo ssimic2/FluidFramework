@@ -4,18 +4,16 @@
  */
 
 import React, { useEffect, useState } from "react";
-
 import { Alert, Button, Stack } from "react-bootstrap";
-
-import { TimestampController } from "./controller";
-import { RollbackAgent, RollbackStatus } from "./RollbackAgent";
+import { DataController } from "./dataController";
+import { RecoveryAgent, RecoveryInfo } from "./recoveryAgent";
 
 export interface IAppViewProps {
     updateCounter: () => Promise<void>;
     forceCorruption: () => Promise<void>;
     recoverContainer: () => Promise<void>;
-    timestampController: TimestampController;
-    rollbackAgent: RollbackAgent;
+    dataController: DataController;
+    recoveryAgent?: RecoveryAgent;
 }
 
 export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
@@ -23,84 +21,77 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
         updateCounter,
         forceCorruption,
         recoverContainer,
-        timestampController,
-        rollbackAgent,
+        dataController,
+        recoveryAgent,
     } = props;
 
-    const [timestamp, setTimestamp] = useState<number>(
-        timestampController.value
-    );
+    const [data, setData] = useState<number>(dataController.value);
 
-    const [rollbackStatus, setRollbackStatus] = useState<RollbackStatus>(
-        rollbackAgent.getRecoveryStatus
+    const [recoveryInfo, setRecoveryInfo] = useState<RecoveryInfo | undefined>(
+        recoveryAgent?.getRecoveryInfo
     );
 
     useEffect(() => {
-        const timestampHandler = () => {
-            setTimestamp(timestampController.value);
+        const dataHandler = () => {
+            setData(dataController.value);
         };
-        timestampController.on("timeChanged", timestampHandler);
+        dataController.on("dataChanged", dataHandler);
         return () => {
-            timestampController.off("timeChanged", timestampHandler);
+            dataController.off("dataChanged", dataHandler);
         };
-    }, [timestampController]);
+    }, [dataController]);
 
     useEffect(() => {
+        if (!recoveryAgent) {
+            return;
+        }
+
         const statusChange = () => {
-            setRollbackStatus(rollbackAgent.getRecoveryStatus);
+            setRecoveryInfo(recoveryAgent.getRecoveryInfo);
         };
-        rollbackAgent.on("rollbackInfoChanged", statusChange);
+        const containerCorrupted = () => {
+            recoverContainer();
+        };
+        recoveryAgent.on("recoveryInfoChanged", statusChange);
+        recoveryAgent.on("containerCorrupted", containerCorrupted);
         return () => {
-            rollbackAgent.off("rollbackInfoChanged", statusChange);
+            recoveryAgent.off("recoveryInfoChanged", statusChange);
+            recoveryAgent.off("containerCorrupted", containerCorrupted);
         };
-    }, [timestampController]);
+    }, [recoveryAgent]);
 
     const showAlert =
-        rollbackStatus.isContainerCorrupted ||
-        rollbackStatus.isContainerRecovered;
-    const alertVariant = rollbackStatus.isContainerRecovered
+        recoveryInfo?.isContainerCorrupted ||
+        recoveryInfo?.isContainerRecovered;
+    const alertVariant = recoveryInfo?.isContainerRecovered
         ? "success"
         : "danger";
-    const alertMsg = rollbackStatus.isContainerRecovered
-        ? "Document was Recovered"
-        : "Document Corrupted";
+    const alertMsg = recoveryInfo?.isContainerRecovered
+        ? "Document was recovered."
+        : "Document was corrupted.";
+    const newDocLink =
+        "http://localhost:8080/#" + recoveryInfo?.recoveredContainerId;
 
     return (
         <div className="col-md-12 text-center">
             {showAlert ? (
-                <Alert variant={alertVariant}>{alertMsg}</Alert>
+                <Alert variant={alertVariant} className="pe-auto">
+                    {alertMsg}
+                </Alert>
             ) : (
                 <div style={{ marginBottom: 40 }} />
             )}
 
             <Stack gap={5}>
-                <div>
-                    <h2>My data - Counter:</h2>
-                    <div style={{ marginBottom: 10, fontSize: 40 }}>
-                        {timestamp}
-                    </div>
+                <div className="m-5">
+                    <h5>My Counter:</h5>
+                    <div style={{ marginBottom: 10, fontSize: 40 }}>{data}</div>
 
                     <Button
                         className="btn btn-secondary"
                         onClick={updateCounter}
                     >
-                        Update Counter
-                    </Button>
-                </div>
-
-                <div>
-                    <Button
-                        className="btn btn-danger"
-                        onClick={forceCorruption}
-                    >
-                        Force Corruption
-                    </Button>
-                    <Button
-                        className="btn btn-primary"
-                        onClick={recoverContainer}
-                        // disabled={true}
-                    >
-                        Recover Container
+                        Increment Counter
                     </Button>
                 </div>
 
@@ -115,17 +106,31 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
                             <tr>
                                 <th scope="row">1</th>
                                 <td>Id</td>
-                                <td>{rollbackStatus.originalContainerId}</td>
+                                <td>{recoveryInfo?.originalContainerId}</td>
                             </tr>
                             <tr>
                                 <th scope="row">2</th>
                                 <td>Is Corrupted</td>
                                 <td>
-                                    {rollbackStatus.isContainerCorrupted.toString()}
+                                    {recoveryInfo?.isContainerCorrupted?.toString()}
                                 </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Recovery Agent ID</td>
+                                <td>{recoveryInfo?.agentId}</td>
                             </tr>
                         </tbody>
                     </table>
+                    <div>
+                        <Button
+                            className="btn btn-danger"
+                            onClick={forceCorruption}
+                            disabled={recoveryInfo?.isContainerCorrupted}
+                        >
+                            Force Container Corruption
+                        </Button>
+                    </div>
                 </div>
 
                 <div
@@ -139,25 +144,30 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
                             <tr>
                                 <th scope="row">1</th>
                                 <td>Id</td>
-                                <td>{rollbackStatus.recoveredContainerId}</td>
+                                <td>{recoveryInfo?.recoveredContainerId}</td>
                             </tr>
                             <tr>
                                 <th scope="row">2</th>
                                 <td>Recovery Status</td>
-                                <td>{rollbackStatus.recoveryStatus}</td>
+                                <td>{recoveryInfo?.recoveryStatus}</td>
                             </tr>
                             <tr>
                                 <th scope="row">3</th>
                                 <td>Recovery Log</td>
-                                <td>{rollbackStatus.recoveryLog}</td>
+                                <td>{recoveryInfo?.recoveryLog}</td>
                             </tr>
                             <tr>
                                 <th scope="row">4</th>
                                 <td>Recovered by Client</td>
-                                <td>{rollbackStatus.recoveredBy}</td>
+                                <td>{recoveryInfo?.recoveredBy}</td>
                             </tr>
                         </tbody>
                     </table>
+                    {recoveryInfo?.recoveredContainerId ? (
+                        <a href={newDocLink} target="_blank">
+                            View Recovered Container
+                        </a>
+                    ) : null}
                 </div>
             </Stack>
         </div>
