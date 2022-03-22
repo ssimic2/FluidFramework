@@ -12,7 +12,7 @@ import { connectionConfig } from "./azureConfig";
 
 import { AppView } from "./appView";
 import { EventItemType } from "./dataTypes";
-
+import { ContainerDebugLogger } from "./containerDebugLogger";
 // Define the schema of our Container.
 const containerSchema = {
     initialObjects: {
@@ -24,6 +24,9 @@ const containerSchema = {
 async function start(): Promise<void> {
     const clientProps = {
         connection: connectionConfig,
+        // TODO: Remove. This is sample only.
+        // Shell UI should not be creating this logger, only the ap that wants to communicate to our app
+        logger: new ContainerDebugLogger(),
     };
     const client = new AzureClient(clientProps);
     let container: IFluidContainer;

@@ -56,6 +56,7 @@
     "@fluidframework/routerlicious-urlresolver": "^0.58.3000",
     "@fluidframework/runtime-utils": "^0.58.3000",
     "@fluidframework/sequence": "^0.58.3000",
+    "@fluidframework/telemetry-utils": "^0.58.3000",
     "@fluidframework/test-client-utils": "^0.58.3000",
     "@fluidframework/tinylicious-driver": "^0.58.3000",
     "bootstrap": "^5.1.3",

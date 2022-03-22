@@ -6,16 +6,14 @@
 import {
     ITelemetryBaseEvent,
     ITelemetryBaseLogger,
-    ITelemetryProperties,
 } from "@fluidframework/common-definitions";
 import { performance } from "@fluidframework/common-utils";
-import { debug as registerDebug, IDebugger } from "debug";
-import { TelemetryLogger, MultiSinkLogger, ChildLogger, ITelemetryLoggerPropertyBags } from "./logger";
+import { TelemetryLogger, MultiSinkLogger, ChildLogger, ITelemetryLoggerPropertyBags } from "@fluidframework/telemetry-utils";
 
 /**
  * Implementation of debug logger
  */
-export class DebugLogger extends TelemetryLogger {
+export class ContainerDebugLogger extends TelemetryLogger {
     /**
      * Create debug logger - all events are output to debug npm library
      * @param namespace - Telemetry event name prefix to add to all events
@@ -27,14 +25,11 @@ export class DebugLogger extends TelemetryLogger {
         properties?: ITelemetryLoggerPropertyBags,
     ): TelemetryLogger {
         console.log("create debugger", namespace);
-        // Setup base logger upfront, such that host can disable it (if needed)
-        const debug = registerDebug(namespace);
 
-        const debugErr = registerDebug(namespace);
-        debugErr.log = console.error.bind(console);
-        debugErr.enabled = true;
 
-        return new DebugLogger(debug, debugErr, properties);
+        // TODO: Kick Off another node process running our (Shell UI) App
+
+        return new ContainerDebugLogger(properties);
     }
 
     /**
@@ -52,11 +47,11 @@ export class DebugLogger extends TelemetryLogger {
     ): TelemetryLogger {
         console.log("mixinDebugLogger debugger", namespace);
         if (!baseLogger) {
-            return DebugLogger.create(namespace, properties);
+            return ContainerDebugLogger.create(namespace, properties);
         }
 
         const multiSinkLogger = new MultiSinkLogger(undefined, properties);
-        multiSinkLogger.addLogger(DebugLogger.create(namespace, this.tryGetBaseLoggerProps(baseLogger)));
+        multiSinkLogger.addLogger(ContainerDebugLogger.create(namespace, this.tryGetBaseLoggerProps(baseLogger)));
         multiSinkLogger.addLogger(ChildLogger.create(baseLogger, namespace));
 
         return multiSinkLogger;
@@ -70,8 +65,6 @@ export class DebugLogger extends TelemetryLogger {
     }
 
     constructor(
-        private readonly debug: IDebugger,
-        private readonly debugErr: IDebugger,
         properties?: ITelemetryLoggerPropertyBags,
     ) {
         super(undefined, properties);
@@ -83,49 +76,29 @@ export class DebugLogger extends TelemetryLogger {
      * @param event - the event to send
      */
     public send(event: ITelemetryBaseEvent): void {
-        console.log("event-----", event);
-        const newEvent: ITelemetryProperties = this.prepareEvent(event);
-        const isError = newEvent.category === "error";
-        let logger = isError ? this.debugErr : this.debug;
+        console.log("Container Debug Logger event -----", event);
 
-        // Use debug's coloring schema for base of the event
         const index = event.eventName.lastIndexOf(TelemetryLogger.eventNamespaceSeparator);
         const name = event.eventName.substring(index + 1);
-        if (index > 0) {
-            logger = logger.extend(event.eventName.substring(0, index));
-        }
-        newEvent.eventName = undefined;
-
+        const stack = event.stack ? event.stack : "";
         let tick = "";
         tick = `tick=${TelemetryLogger.formatTick(performance.now())}`;
 
-        // Extract stack to put it last, but also to avoid escaping '\n' in it by JSON.stringify below
-        const stack = newEvent.stack ? newEvent.stack : "";
-        newEvent.stack = undefined;
-
-        // Watch out for circular references - they can come from two sources
-        // 1) error object - we do not control it and should remove it and retry
-        // 2) properties supplied by telemetry caller - that's a bug that should be addressed!
         let payload: string;
         try {
-            payload = JSON.stringify(newEvent);
+            payload = JSON.stringify(event);
         } catch (error) {
-            newEvent.error = undefined;
-            payload = JSON.stringify(newEvent);
+            event.error = undefined;
+            payload = JSON.stringify(event);
         }
 
         if (payload === "{}") {
             payload = "";
         }
 
-        // Force errors out, to help with diagnostics
-        if (isError) {
-            logger.enabled = true;
-        }
+        console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
-        console.log(`${name} ${payload} ${tick} ${stack}`);
+        // TODO: Send message to our Shell App via IPC
 
-        // Print multi-line.
-        logger(`${name} ${payload} ${tick} ${stack}`);
     }
 }
