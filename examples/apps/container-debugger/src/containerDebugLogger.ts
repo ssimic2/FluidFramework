@@ -8,7 +8,12 @@ import {
     ITelemetryBaseLogger,
 } from "@fluidframework/common-definitions";
 import { performance } from "@fluidframework/common-utils";
-import { TelemetryLogger, MultiSinkLogger, ChildLogger, ITelemetryLoggerPropertyBags } from "@fluidframework/telemetry-utils";
+import {
+    TelemetryLogger,
+    MultiSinkLogger,
+    ChildLogger,
+    ITelemetryLoggerPropertyBags,
+} from "@fluidframework/telemetry-utils";
 
 /**
  * Implementation of debug logger
@@ -25,7 +30,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         properties?: ITelemetryLoggerPropertyBags,
     ): TelemetryLogger {
         console.log("create debugger", namespace);
-
 
         // TODO: Kick Off another node process running our (Shell UI) App
 
@@ -51,22 +55,29 @@ export class ContainerDebugLogger extends TelemetryLogger {
         }
 
         const multiSinkLogger = new MultiSinkLogger(undefined, properties);
-        multiSinkLogger.addLogger(ContainerDebugLogger.create(namespace, this.tryGetBaseLoggerProps(baseLogger)));
+        multiSinkLogger.addLogger(
+            ContainerDebugLogger.create(
+                namespace,
+                this.tryGetBaseLoggerProps(baseLogger),
+            ),
+        );
         multiSinkLogger.addLogger(ChildLogger.create(baseLogger, namespace));
 
         return multiSinkLogger;
     }
 
     private static tryGetBaseLoggerProps(baseLogger?: ITelemetryBaseLogger) {
-        if(baseLogger instanceof TelemetryLogger) {
-            return (baseLogger as any as {properties: ITelemetryLoggerPropertyBags}).properties;
+        if (baseLogger instanceof TelemetryLogger) {
+            return (
+                baseLogger as any as {
+                    properties: ITelemetryLoggerPropertyBags;
+                }
+            ).properties;
         }
         return undefined;
     }
 
-    constructor(
-        properties?: ITelemetryLoggerPropertyBags,
-    ) {
+    constructor(properties?: ITelemetryLoggerPropertyBags) {
         super(undefined, properties);
     }
 
@@ -78,9 +89,11 @@ export class ContainerDebugLogger extends TelemetryLogger {
     public send(event: ITelemetryBaseEvent): void {
         console.log("Container Debug Logger event -----", event);
 
-        const index = event.eventName.lastIndexOf(TelemetryLogger.eventNamespaceSeparator);
+        const index = event.eventName.lastIndexOf(
+            TelemetryLogger.eventNamespaceSeparator,
+        );
         const name = event.eventName.substring(index + 1);
-        const stack = event.stack ? event.stack : "";
+        const stack = event.stack ?? "";
         let tick = "";
         tick = `tick=${TelemetryLogger.formatTick(performance.now())}`;
 
@@ -99,6 +112,5 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
         // TODO: Send message to our Shell App via IPC
-
     }
 }
