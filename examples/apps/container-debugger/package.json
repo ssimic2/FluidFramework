@@ -64,6 +64,7 @@
     "react": "^16.10.2",
     "react-bootstrap": "^2.2.1",
     "react-dom": "^16.10.2",
+    "react-json-view": "^1.21.3",
     "style-loader": "^1.0.0",
     "uuid": "^8.3.1"
   },

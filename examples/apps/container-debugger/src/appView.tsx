@@ -3,26 +3,55 @@
  * Licensed under the MIT License.
  */
 
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-import React from "react";
+import React, { useState } from "react";
 import { Stack } from "react-bootstrap";
+import ReactJson from "react-json-view";
+import { ContainerInfo, EventItem } from "./dataTypes";
+import { EventItemView } from "./eventItemView";
+
 export interface IAppViewProps {
-    title: string;
+    containerInfo: ContainerInfo;
+    eventItems?: EventItem[];
 }
 
 export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
-    const { title } = props;
+    const { containerInfo, eventItems } = props;
+    const [selectedEvent, setSelectedEvent] = useState<EventItem | undefined>(
+        eventItems && eventItems[0],
+    );
 
     return (
-        <div className="col-md-12 text-center">
+        <div className="container">
             <Stack gap={5}>
                 <div className="m-5">
-                    <h5>My Title:</h5>
+                    <h5>My Container:</h5>
                     <div style={{ marginBottom: 10, fontSize: 40 }}>
-                        {title}
+                        {containerInfo.id}
                     </div>
                 </div>
             </Stack>
+
+            <div className="row">
+                <div className="col">
+                    <table className="table table-striped table-bordered">
+                        <tbody>
+                            {eventItems &&
+                                eventItems.map((item) => (
+                                    <EventItemView
+                                        key={item.id}
+                                        item={item}
+                                        onSelect={() => setSelectedEvent(item)}
+                                    />
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="col">
+                    <ReactJson
+                        src={selectedEvent ? (selectedEvent as object) : {}}
+                    />
+                </div>
+            </div>
         </div>
     );
 };

@@ -11,6 +11,7 @@ import { IFluidContainer, SharedMap } from "fluid-framework";
 import { connectionConfig } from "./azureConfig";
 
 import { AppView } from "./appView";
+import { EventItemType } from "./dataTypes";
 
 // Define the schema of our Container.
 const containerSchema = {
@@ -59,10 +60,29 @@ async function start(): Promise<void> {
         ));
     }
 
+    const containerInfo = {
+        id: containerId,
+        connected: true,
+        dirty: false,
+    };
+
+    const eventItems = [
+        {
+            id: "1",
+            type: EventItemType.IncommingOp,
+            title: "Incoming op 1",
+            data: { someData1: "hey" },
+        },
+        {
+            id: "2",
+            type: EventItemType.OutgoingOp,
+            title: "Outgoing op 1",
+            data: { someData2: "hey there" },
+        },
+    ];
+
     ReactDOM.render(
-        <AppView
-            title="Hello World"
-        />,
+        <AppView containerInfo={containerInfo} eventItems={eventItems} />,
         div,
     );
 }
