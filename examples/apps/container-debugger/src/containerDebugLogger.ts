@@ -25,14 +25,12 @@ export class ContainerDebugLogger extends TelemetryLogger {
      * @param properties - Base properties to add to all events
      * @param propertyGetters - Getters to add additional properties to all events
      */
+    private debuggerPopup: Window;
+
     public static create(
         namespace: string,
-        properties?: ITelemetryLoggerPropertyBags,
+        properties?: ITelemetryLoggerPropertyBags
     ): TelemetryLogger {
-        console.log("create debugger", namespace);
-
-        // TODO: Kick Off another node process running our (Shell UI) App
-
         return new ContainerDebugLogger(properties);
     }
 
@@ -47,7 +45,7 @@ export class ContainerDebugLogger extends TelemetryLogger {
     public static mixinDebugLogger(
         namespace: string,
         baseLogger?: ITelemetryBaseLogger,
-        properties?: ITelemetryLoggerPropertyBags,
+        properties?: ITelemetryLoggerPropertyBags
     ): TelemetryLogger {
         console.log("mixinDebugLogger debugger", namespace);
         if (!baseLogger) {
@@ -58,8 +56,8 @@ export class ContainerDebugLogger extends TelemetryLogger {
         multiSinkLogger.addLogger(
             ContainerDebugLogger.create(
                 namespace,
-                this.tryGetBaseLoggerProps(baseLogger),
-            ),
+                this.tryGetBaseLoggerProps(baseLogger)
+            )
         );
         multiSinkLogger.addLogger(ChildLogger.create(baseLogger, namespace));
 
@@ -79,6 +77,15 @@ export class ContainerDebugLogger extends TelemetryLogger {
 
     constructor(properties?: ITelemetryLoggerPropertyBags) {
         super(undefined, properties);
+
+        // Kick Off another node process running our (Shell UI) App
+        let popupParams = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
+        width=0,height=0,left=-1000,top=-1000`;
+        this.debuggerPopup = window.open(
+            "http://localhost:8080/",
+            "Container Debugger",
+            popupParams
+        );
     }
 
     /**
@@ -90,7 +97,7 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log("Container Debug Logger event -----", event);
 
         const index = event.eventName.lastIndexOf(
-            TelemetryLogger.eventNamespaceSeparator,
+            TelemetryLogger.eventNamespaceSeparator
         );
         const name = event.eventName.substring(index + 1);
         const stack = event.stack ?? "";
@@ -112,5 +119,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
         // TODO: Send message to our Shell App via IPC
+        this.debuggerPopup?.postMessage(event, "http://localhost:8080/");
     }
 }
