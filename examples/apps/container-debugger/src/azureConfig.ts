@@ -22,15 +22,18 @@ const userConfig = {
     name: user.name,
 };
 
+const azureUser = {
+    userName: "TestUser",
+    userId: "test-user",
+};
+
 export const connectionConfig: AzureConnectionConfig = useAzure
     ? {
-          tenantId: "YOUR-TENANT-ID-HERE",
-          tokenProvider: new AzureFunctionTokenProvider(
-              "AZURE-FUNCTION-URL/api/GetAzureToken",
-              { userId: "test-user", userName: "Test User" },
-          ),
-          orderer: "ENTER-ORDERER-URL-HERE",
-          storage: "ENTER-STORAGE-URL-HERE",
+          tenantId: "1e298c52-acdc-49ad-baf7-b2516d555fe7",
+        tokenProvider: new AzureFunctionTokenProvider("https://sonaliazfunc.azurewebsites.net/api/GetFrsToken",
+            azureUser),
+        orderer: "https://alfred.westus2.fluidrelay.azure.com",
+        storage: "https://historian.westus2.fluidrelay.azure.com",
       }
     : {
           tenantId: LOCAL_MODE_TENANT_ID,

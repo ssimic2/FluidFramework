@@ -30,9 +30,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         properties?: ITelemetryLoggerPropertyBags,
     ): TelemetryLogger {
         console.log("create debugger", namespace);
-
-        // TODO: Kick Off another node process running our (Shell UI) App
-
         return new ContainerDebugLogger(properties);
     }
 
@@ -112,5 +109,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
         // TODO: Send message to our Shell App via IPC
+        window.postMessage(payload, "http://localhost:8080/");
     }
 }
