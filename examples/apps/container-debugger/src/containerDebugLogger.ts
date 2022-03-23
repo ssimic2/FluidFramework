@@ -25,11 +25,12 @@ export class ContainerDebugLogger extends TelemetryLogger {
      * @param properties - Base properties to add to all events
      * @param propertyGetters - Getters to add additional properties to all events
      */
+    private readonly debuggerPopup: Window | null;
+
     public static create(
         namespace: string,
         properties?: ITelemetryLoggerPropertyBags,
     ): TelemetryLogger {
-        console.log("create debugger", namespace);
         return new ContainerDebugLogger(properties);
     }
 
@@ -76,6 +77,15 @@ export class ContainerDebugLogger extends TelemetryLogger {
 
     constructor(properties?: ITelemetryLoggerPropertyBags) {
         super(undefined, properties);
+
+        // Kick Off another node process running our (Shell UI) App
+        const popupParams = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
+        width=0,height=0,left=-1000,top=-1000`;
+        this.debuggerPopup = window.open(
+            "http://localhost:8080/",
+            "Container Debugger",
+            popupParams,
+        );
     }
 
     /**
@@ -109,6 +119,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
         // TODO: Send message to our Shell App via IPC
-        window.postMessage(payload, "http://localhost:8080/");
+        this.debuggerPopup?.postMessage(event, "http://localhost:8080/");
     }
 }
