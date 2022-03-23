@@ -79,6 +79,7 @@ async function start(): Promise<void> {
     // and hook to the Telemetry system
     const clientProps = {
         connection: connectionConfig,
+        // logger: new ContainerDebugLogger(),
     };
     const client = new AzureClient(clientProps);
     let container: IFluidContainer;

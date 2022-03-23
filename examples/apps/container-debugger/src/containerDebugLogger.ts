@@ -119,6 +119,6 @@ export class ContainerDebugLogger extends TelemetryLogger {
         console.log(`CDL: ${name} ${payload} ${tick} ${stack}`);
 
         // TODO: Send message to our Shell App via IPC
-        this.debuggerPopup?.postMessage(event, "http://localhost:8080/");
+        this.debuggerPopup?.postMessage(payload, "http://localhost:8080/");
     }
 }
