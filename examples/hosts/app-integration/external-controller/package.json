@@ -38,6 +38,7 @@
     "webpack:dev": "webpack --env.development"
   },
   "dependencies": {
+    "@fluid-example/container-debugger": "^0.58.3000",
     "@fluidframework/azure-client": "^0.58.3000",
     "@fluidframework/common-definitions": "^0.20.1",
     "@fluidframework/test-client-utils": "^0.58.3000",

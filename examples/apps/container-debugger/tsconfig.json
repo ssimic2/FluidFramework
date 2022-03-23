@@ -6,7 +6,8 @@
     ],
     "compilerOptions": {
         "module": "esnext",
-        "outDir": "dist",
+        "rootDir": "./src",
+        "outDir": "./dist",
         "jsx": "react",
         "types": [
             "jest",
