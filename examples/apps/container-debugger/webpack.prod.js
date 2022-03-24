@@ -3,5 +3,7 @@
  * Licensed under the MIT License.
  */
 
-export * from "./containerViewRuntimeFactory";
-export * from "./containerDebugLogger";
+module.exports = {
+    mode: "production",
+    devtool: "source-map"
+};

@@ -3,5 +3,9 @@
  * Licensed under the MIT License.
  */
 
-export * from "./containerViewRuntimeFactory";
-export * from "./containerDebugLogger";
+module.exports = {
+    "extends": [
+        "@fluidframework/eslint-config-fluid/"
+    ],
+    "rules": {}
+}

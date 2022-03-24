@@ -2,6 +2,7 @@
  * Copyright (c) Microsoft Corporation and contributors. All rights reserved.
  * Licensed under the MIT License.
  */
+import { ContainerDebugLogger } from "@fluid-example/example-utils";
 import {
     AzureFunctionTokenProvider,
     AzureClient,
@@ -79,6 +80,7 @@ async function start(): Promise<void> {
     // and hook to the Telemetry system
     const clientProps = {
         connection: connectionConfig,
+        logger: new ContainerDebugLogger(),
     };
     const client = new AzureClient(clientProps);
     let container: IFluidContainer;
