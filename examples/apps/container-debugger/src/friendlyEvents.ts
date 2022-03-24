@@ -36,7 +36,8 @@ import { EventItem, EventItemType } from "./dataTypes";
             return {
                 id,
                 type: EventItemType.IncommingOp,
-                title: `${data.eventName} ${data.containerId}`,
+                title: `${data.eventName}`,
+                subtitle: `${data.containerId}`,
                 data,
             };
         }

@@ -6,9 +6,8 @@
 // import { ITelemetryBaseEvent } from "@fluidframework/common-definitions";
 import React, { useEffect, useState } from "react";
 import ReactJson from "react-json-view";
-import { EventItem } from "./dataTypes";
 import { EventItemView } from "./eventItemView";
-import { EventTransformer } from "./eventTransformer";
+import { EventTransformer, ILogItem } from "./eventTransformer";
 
 export interface IAppViewProps {
     title: string;
@@ -16,12 +15,13 @@ export interface IAppViewProps {
 }
 
 export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
-    const [eventItems, setEventItems] = useState<EventItem[]>([]);
+    const [logItems, setLogItems] = useState<ILogItem[]>([]);
     const [filteredEventItems, setFilteredEventItems] =
-        useState<EventItem[]>(eventItems);
-    const [selectedEvent, setSelectedEvent] = useState<EventItem | undefined>(
-        eventItems[0],
+        useState<ILogItem[]>(logItems);
+    const [selectedLogItem, setSelectedLogItem] = useState<ILogItem | undefined>(
+        logItems[0],
     );
+
     const [liveContainers, setLiveContainers] = useState<string[]>([]);
     const [selectedContainer, setSelectedContainer] = useState<
         string | undefined
@@ -51,8 +51,8 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
             //     data,
             // };
 
-            eventItems.push(logItem.eventItem);
-            setEventItems([...eventItems]);
+            logItems.push(logItem);
+            setLogItems([...logItems]);
 
             if (liveContainers.indexOf(data.containerId) === -1) {
                 liveContainers.push(data.containerId);
@@ -73,12 +73,12 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (selectedContainer) {
-            const items = eventItems.filter(
-                (a) => a.data.containerId === selectedContainer,
+            const items = logItems.filter(
+                (a) => a.eventItem.data.containerId === selectedContainer,
             );
             setFilteredEventItems(items);
         } else {
-            setFilteredEventItems(eventItems);
+            setFilteredEventItems(logItems);
         }
     }, [selectedContainer]);
 
@@ -106,17 +106,19 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
 
             <div className="row">
                 <div className="col">
+                <ul className="list-group">
                     {filteredEventItems.map((item) => (
                         <EventItemView
-                            key={item.id}
+                            key={item.eventItem.id}
                             item={item}
-                            onSelect={() => setSelectedEvent(item)}
+                            onSelect={() => setSelectedLogItem(item)}
                         />
                     ))}
+                    </ul>
                 </div>
                 <div className="col">
                     <ReactJson
-                        src={selectedEvent ? (selectedEvent as object) : {}}
+                        src={selectedLogItem ? (selectedLogItem as object) : {}}
                     />
                 </div>
             </div>

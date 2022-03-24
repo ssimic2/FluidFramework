@@ -27,6 +27,17 @@ async function start(): Promise<void> {
                 },
                 eventNames: ["xxx", "yyy"],
             },
+            {
+                meta: {
+                    title: "Container",
+                    color: "blue",
+                    filterOut: false,
+                },
+                eventNames: [
+                    "fluid:telemetry:Container:Load_start",
+                    "fluid:telemetry:Container:ConnectionStateChange_Connecting",
+                ],
+            },
         ],
     };
 
