@@ -19,5 +19,6 @@ export interface EventItem {
     id: string
     type: EventItemType
     title: string
+    subtitle?: string
     data: any
 }

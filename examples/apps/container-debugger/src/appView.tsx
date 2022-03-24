@@ -6,11 +6,13 @@
 // import { ITelemetryBaseEvent } from "@fluidframework/common-definitions";
 import React, { useEffect, useState } from "react";
 import ReactJson from "react-json-view";
-import { EventItem, EventItemType } from "./dataTypes";
+import { EventItem } from "./dataTypes";
 import { EventItemView } from "./eventItemView";
+import { EventTransformer } from "./eventTransformer";
 
 export interface IAppViewProps {
     title: string;
+    transformer: EventTransformer;
 }
 
 export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
@@ -18,7 +20,7 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
     const [filteredEventItems, setFilteredEventItems] =
         useState<EventItem[]>(eventItems);
     const [selectedEvent, setSelectedEvent] = useState<EventItem | undefined>(
-        eventItems[0]
+        eventItems[0],
     );
     const [liveContainers, setLiveContainers] = useState<string[]>([]);
     const [selectedContainer, setSelectedContainer] = useState<
@@ -36,14 +38,20 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
             }
 
             const id = Math.round(event.timeStamp * 1000).toString();
-            const newItem = {
-                id,
-                type: EventItemType.IncommingOp,
-                title: `${data.eventName} ${data.containerId}`,
-                data,
-            };
 
-            eventItems.push(newItem);
+            const logItem = props.transformer.getLogItem(id, data);
+            if(!logItem) {
+                return;
+            }
+
+            // const newItem = {
+            //     id,
+            //     type: EventItemType.IncommingOp,
+            //     title: `${data.eventName} ${data.containerId}`,
+            //     data,
+            // };
+
+            eventItems.push(logItem.eventItem);
             setEventItems([...eventItems]);
 
             if (liveContainers.indexOf(data.containerId) === -1) {
@@ -66,7 +74,7 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (selectedContainer) {
             const items = eventItems.filter(
-                (a) => a.data.containerId === selectedContainer
+                (a) => a.data.containerId === selectedContainer,
             );
             setFilteredEventItems(items);
         } else {
@@ -85,17 +93,9 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
                         onChange={(e) => setSelectedContainer(e.target.value)}
                         aria-label="Default select example"
                     >
-                        <option
-                            value={undefined}
-                        >
-                            All Containers
-                        </option>
+                        <option value={undefined}>All Containers</option>
                         {liveContainers.map((c) => (
-                            <option
-                                key={c}
-                                value={c}
-
-                            >
+                            <option key={c} value={c}>
                                 {c}
                             </option>
                         ))}

@@ -6,6 +6,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { AppView } from "./appView";
+import { EventTransformer } from "./eventTransformer";
 
 async function start(): Promise<void> {
     const div = document.getElementById("content") as HTMLDivElement;
@@ -16,7 +17,22 @@ async function start(): Promise<void> {
         div,
     );
 
-    ReactDOM.render(<AppView title={"test"} />, div);
+    const properties = {
+        eventGroups: [
+            {
+                meta: {
+                    title: "some title",
+                    color: "some color",
+                    filterOut: false,
+                },
+                eventNames: ["xxx", "yyy"],
+            },
+        ],
+    };
+
+    const transformer = new EventTransformer(properties);
+
+    ReactDOM.render(<AppView title={"test"} transformer={transformer}/>, div);
 }
 
 start().catch((error) => console.error(error));
