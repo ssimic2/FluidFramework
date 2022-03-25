@@ -79,12 +79,10 @@ export class ContainerDebugLogger extends TelemetryLogger {
         super(undefined, properties);
 
         // Kick Off another node process running our (Shell UI) App
-        const popupParams = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
-        width=0,height=0,left=-1000,top=-1000`;
         this.debuggerPopup = window.open(
             "http://localhost:8080/",
-            "Container Debugger",
-            popupParams,
+            "_blank",
+            "width=1000,height=1000",
         );
     }
 

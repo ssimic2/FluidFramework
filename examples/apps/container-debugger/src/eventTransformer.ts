@@ -22,7 +22,7 @@ export interface IEventTrasformerProperties {
 }
 
 const defaultMeta = {
-    title: "General",
+    title: "Telemetry",
     color: "#cccccc",
     filterOut: false,
 };

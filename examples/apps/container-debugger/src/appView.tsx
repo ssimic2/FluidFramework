@@ -104,8 +104,8 @@ export const AppView: React.FC<IAppViewProps> = (props: IAppViewProps) => {
                 <div className="col"></div>
             </div>
 
-            <div className="row">
-                <div className="col">
+            <div className="row" style={{ minWidth: 120 }}>
+                <div className="col" style={{ minWidth: 120 }}>
                 <ul className="list-group">
                     {filteredEventItems.map((item) => (
                         <EventItemView

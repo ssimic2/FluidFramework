@@ -28,18 +28,32 @@ import { EventItem, EventItemType } from "./dataTypes";
     }
 
     public getEventItem(id: string, data: any): EventItem {
-        if(data.eventName === "fluid:telemetry:Container:Load_start") {
-            return this.convertContainerLoadStart(id, data);
-        } else if(data.eventName === "fluid:telemetry:Container:ConnectionStateChange_Connecting") {
-            return this.convertContainerConnecting(id, data);
-        } else {
-            return {
-                id,
-                type: EventItemType.IncommingOp,
-                title: `${data.eventName}`,
-                subtitle: `${data.containerId}`,
-                data,
-            };
-        }
+        // if(data.eventName === "fluid:telemetry:Container:Load_start") {
+        //     return this.convertContainerLoadStart(id, data);
+        // } else if(data.eventName === "fluid:telemetry:Container:ConnectionStateChange_Connecting") {
+        //     return this.convertContainerConnecting(id, data);
+        // } else if(data.eventName === "fluid:telemetry:RouterliciousDriver:readBlob_end") {
+        //     return {
+        //         id,
+        //         type: EventItemType.IncommingOp,
+        //         title: "RouterliciousDriver Read Blob",
+        //         data,
+        //     };
+        // } else {
+        //     return {
+        //         id,
+        //         type: EventItemType.IncommingOp,
+        //         title: `${data.eventName}`,
+        //         subtitle: `${data.containerId}`,
+        //         data,
+        //     };
+        // }
+        return {
+            id,
+            type: EventItemType.IncommingOp,
+            title: `${data.eventName}`,
+            subtitle: `${data.containerId}`,
+            data,
+        };
     }
 }
