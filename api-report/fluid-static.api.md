@@ -41,6 +41,8 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     constructor(container: IContainer, rootDataObject: RootDataObject);
     attach(): Promise<string>;
     get attachState(): AttachState;
+    // (undocumented)
+    get c(): IContainer;
     get connected(): boolean;
     create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
     dispose(): void;
@@ -59,6 +61,8 @@ export interface IConnection {
 export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
     attach(): Promise<string>;
     readonly attachState: AttachState;
+    // (undocumented)
+    c: IContainer;
     readonly connected: boolean;
     create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
     dispose(): void;

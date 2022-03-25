@@ -95,12 +95,10 @@ export class ContainerDebugLogger extends TelemetryLogger {
         this.containerStateFun = containerStateFun;
         this.constainerStateTriggers = constainerStateTriggers;
         // Kick Off another node process running our (Shell UI) App
-        const popupParams = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
-        width=0,height=0,left=-1000,top=-1000`;
         this.debuggerPopup = window.open(
             "http://localhost:8080/",
             "Container Debugger",
-            popupParams,
+            "width=120,height=200",
         );
     }
 

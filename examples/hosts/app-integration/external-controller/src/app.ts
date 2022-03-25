@@ -89,6 +89,7 @@ async function start(): Promise<void> {
         //     console.log("ids do not match", id, containerId)
         //     return;
         // }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return runtime.summarize({
             fullTree: true,
             trackState: false,
@@ -130,7 +131,7 @@ async function start(): Promise<void> {
     document.title = id;
 
     const response = await container.c.request({ url: "/containerRuntime" });
-    runtime = response.value as ContainerRuntime;
+    runtime = response.value;
 
     // Here we are guaranteed that the maps have already been initialized for use with a DiceRollerController
     const sharedMap1 = container.initialObjects.map1 as SharedMap;
