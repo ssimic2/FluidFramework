@@ -18,6 +18,7 @@ import {
     IFluidContainer,
     SharedMap,
 } from "fluid-framework";
+import { ContainerRuntime } from "@fluidframework/container-runtime";
 import { DiceRollerController } from "./controller";
 import { makeAppView } from "./view";
 
@@ -78,14 +79,32 @@ async function initializeNewContainer(container: IFluidContainer): Promise<void>
 async function start(): Promise<void> {
     // Create a custom ITelemetryBaseLogger object to pass into the Tinylicious container
     // and hook to the Telemetry system
-    const clientProps = {
-        connection: connectionConfig,
-        logger: new ContainerDebugLogger(),
-    };
-    const client = new AzureClient(clientProps);
     let container: IFluidContainer;
     let services: AzureContainerServices;
     let id: string;
+    let runtime: ContainerRuntime;
+
+    const containerGetter = async (containerId: string) => {
+        // if(id !== containerId) {
+        //     console.log("ids do not match", id, containerId)
+        //     return;
+        // }
+        return runtime.summarize({
+            fullTree: true,
+            trackState: false,
+            fullGC: true,
+        });
+    };
+
+    const clientProps = {
+        connection: connectionConfig,
+        logger: new ContainerDebugLogger(
+            undefined,
+            containerGetter,
+            ["fluid:telemetry:RouterliciousDriver:getSnapshotTree_end"],
+        ),
+    };
+    const client = new AzureClient(clientProps);
 
     // Get or create the document depending if we are running through the create new flow
     const createNew = location.hash.length === 0;
@@ -109,6 +128,9 @@ async function start(): Promise<void> {
     }
 
     document.title = id;
+
+    const response = await container.c.request({ url: "/containerRuntime" });
+    runtime = response.value as ContainerRuntime;
 
     // Here we are guaranteed that the maps have already been initialized for use with a DiceRollerController
     const sharedMap1 = container.initialObjects.map1 as SharedMap;

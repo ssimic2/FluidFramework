@@ -132,6 +132,8 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
      * Dispose of the container instance, permanently disabling it.
      */
     dispose(): void;
+
+    c: IContainer;
 }
 
 /**
@@ -161,6 +163,10 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
      */
      public get isDirty(): boolean {
         return this.container.isDirty;
+    }
+
+    public get c(): IContainer {
+        return this.container;
     }
 
     /**

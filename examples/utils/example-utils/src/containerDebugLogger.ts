@@ -15,6 +15,7 @@ import {
     ITelemetryLoggerPropertyBags,
 } from "@fluidframework/telemetry-utils";
 
+type ContainerStateFunction = (id: string) => any;
 /**
  * Implementation of debug logger
  */
@@ -27,11 +28,20 @@ export class ContainerDebugLogger extends TelemetryLogger {
      */
     private readonly debuggerPopup: Window | null;
 
+    private readonly containerStateFun?: ContainerStateFunction;
+    private readonly constainerStateTriggers?: string[];
+
     public static create(
         namespace: string,
         properties?: ITelemetryLoggerPropertyBags,
+        containerStateFun?: ContainerStateFunction,
+        constainerStateTriggers?: string[],
     ): TelemetryLogger {
-        return new ContainerDebugLogger(properties);
+        return new ContainerDebugLogger(
+            properties,
+            containerStateFun,
+            constainerStateTriggers,
+        );
     }
 
     /**
@@ -75,9 +85,15 @@ export class ContainerDebugLogger extends TelemetryLogger {
         return undefined;
     }
 
-    constructor(properties?: ITelemetryLoggerPropertyBags) {
+    constructor(
+        properties?: ITelemetryLoggerPropertyBags,
+        containerStateFun?: ContainerStateFunction,
+        constainerStateTriggers?: string[],
+    ) {
         super(undefined, properties);
 
+        this.containerStateFun = containerStateFun;
+        this.constainerStateTriggers = constainerStateTriggers;
         // Kick Off another node process running our (Shell UI) App
         const popupParams = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
         width=0,height=0,left=-1000,top=-1000`;
@@ -120,5 +136,28 @@ export class ContainerDebugLogger extends TelemetryLogger {
 
         // TODO: Send message to our Shell App via IPC
         this.debuggerPopup?.postMessage(payload, "http://localhost:8080/");
+
+        if (
+            this.containerStateFun &&
+            this.constainerStateTriggers &&
+            this.constainerStateTriggers.includes(event.eventName)
+        ) {
+            const docId = event.docId as string;
+            this.containerStateFun(docId).then((result: any) => {
+                const e = {
+                    eventName: "fluid:telemetry:Container:summary",
+                    isTriggered: true,
+                    containerId: event.docId,
+                    docId: event.docId,
+                    containerInfo: result,
+                };
+                this.debuggerPopup?.postMessage(
+                    JSON.stringify(e),
+                    "http://localhost:8080/",
+                );
+            });
+        } else {
+            console.log(" cant find my function");
+        }
     }
 }
