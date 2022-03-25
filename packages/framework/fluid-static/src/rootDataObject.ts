@@ -9,8 +9,8 @@ import {
     defaultRouteRequestHandler,
 } from "@fluidframework/aqueduct";
 import { IContainerRuntime } from "@fluidframework/container-runtime-definitions";
-import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
+import { IRequest, IFluidLoadable } from "@fluidframework/core-interfaces";
+import { create404Response, requestFluidObject } from "@fluidframework/runtime-utils";
 import {
     ContainerSchema,
     DataObjectClass,
@@ -103,6 +103,14 @@ export class RootDataObject extends DataObject<{InitialState: RootDataObjectProp
 
 const rootDataStoreId = "rootDOId";
 
+async function runtimeRequestHandler(request: IRequest, runtime: IContainerRuntime) {
+    if (request.url === "/containerRuntime") {
+        return { mimeType: "fluid/object", status: 200, value: runtime };
+    } else {
+        return create404Response(request);
+    }
+}
+
 /**
  * The DOProviderContainerRuntimeFactory is container code that provides a single RootDataObject.  This data object is
  * dynamically customized (registry and initial objects) based on the schema provided to the container runtime factory.
@@ -120,7 +128,11 @@ export class DOProviderContainerRuntimeFactory extends BaseContainerRuntimeFacto
                 {},
                 registryEntries,
             );
-        super([rootDataObjectFactory.registryEntry], undefined, [defaultRouteRequestHandler(rootDataStoreId)]);
+        super(
+            [rootDataObjectFactory.registryEntry],
+            undefined,
+            [defaultRouteRequestHandler(rootDataStoreId), runtimeRequestHandler],
+        );
         this.rootDataObjectFactory = rootDataObjectFactory;
         this.initialObjects = schema.initialObjects;
     }
