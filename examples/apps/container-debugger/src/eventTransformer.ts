@@ -57,9 +57,14 @@ export interface ILogItem {
         if(!this.eventProperties) {
             return;
         }
-        return this.eventProperties.eventGroups.find((item) => {
-            return item.eventNames.includes(eventName);
-        });
+
+        for(const eventGroup of this.eventProperties.eventGroups) {
+            for(const item of eventGroup.eventNames) {
+                if(eventName.startsWith(item)) {
+                    return eventGroup;
+                }
+            }
+        }
     }
 
     public getGroupData(eventName: string): IEventGroupMeta {

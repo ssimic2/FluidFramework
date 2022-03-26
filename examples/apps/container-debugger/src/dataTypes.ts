@@ -19,6 +19,9 @@ export interface EventItem {
     id: string
     type: EventItemType
     title: string
-    subtitle?: string
+    badgeText?: string,
+    badgeType?: string
+    subtitle1?: string,
+    subtitle2?: string
     data: any
 }

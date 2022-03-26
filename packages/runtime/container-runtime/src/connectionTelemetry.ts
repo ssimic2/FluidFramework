@@ -165,6 +165,17 @@ class OpPerfTelemetry {
             });
             this.clientSequenceNumberForLatencyStatistics = undefined;
         }
+
+        this.logger.sendPerformanceEvent({
+            eventName: "OpProcessed",
+            localMessage: this.clientId === message.clientId,
+            sequenceNumber,
+            referenceSequenceNumber: message.referenceSequenceNumber,
+            clientSequenceNum: message.clientSequenceNumber,
+            minSequenceNum: message.minimumSequenceNumber,
+            msgType: message.type,
+            contant: message.contents,
+        });
     }
 }
 

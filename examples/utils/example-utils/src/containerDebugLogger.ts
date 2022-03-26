@@ -98,7 +98,7 @@ export class ContainerDebugLogger extends TelemetryLogger {
         this.debuggerPopup = window.open(
             "http://localhost:8080/",
             "Container Debugger",
-            "width=120,height=200",
+            "width=1000,height=1000",
         );
     }
 
@@ -145,7 +145,7 @@ export class ContainerDebugLogger extends TelemetryLogger {
                 const e = {
                     eventName: "fluid:telemetry:Container:summary",
                     isTriggered: true,
-                    containerId: event.docId,
+                    containerId: event.containerId,
                     docId: event.docId,
                     containerInfo: result,
                 };
