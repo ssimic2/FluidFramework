@@ -1,7 +1,8 @@
 import * as fs from "node:fs";
 import * as yaml from "js-yaml";
 
-import { TickerConfig, TickerRunner } from "@fluidframework/runner-ticker"
+import { IRunner } from "@fluidframework/runner-interface";
+import { TickerConfig, TickerRunner } from "@fluidframework/runner-ticker";
 
 export interface IStage {
     name: string;
@@ -13,27 +14,28 @@ export interface RunConfig {
     stages: IStage[];
 }
 
-// Get document, or throw exception on error
-try {
+export async function run(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const doc = yaml.load(fs.readFileSync("./testConfig.yml", "utf8")) as RunConfig;
     for(const item of doc.stages) {
         if(item.package === "ticker") {
             const ticker = new TickerRunner(item.params as TickerConfig);
-            ticker.on("event", (e) => {console.log("ticker event", e)})
-            ticker.on("done", (e) => {console.log("ticker done", e)})
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            ticker.run().then(() => {
-                console.log("done");
-            }).catch((error) => {
-                console.log("error", error);
-            });
+            await runStage(ticker);
         } else {
-           console.log("unknown stage-----", item)
+            console.log("unknown stage-----", item)
         }
     }
-    console.log(doc);
-} catch (error) {
-    console.log(error);
 }
+
+export async function runStage(runner: IRunner): Promise<void> {
+    runner.on("status", (e) => {console.log("ticker event:", e)})
+    runner.on("done", () => {console.log("ticker done")})
+    await runner.run()
+}
+
+run().then(() => {
+    console.log("done");
+}).catch((error) => {
+    console.log("error", error);
+});
 

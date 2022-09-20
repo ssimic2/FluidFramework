@@ -4,7 +4,8 @@ import {
 } from "@fluidframework/common-definitions";
 
 export interface IRunnerEvents extends IEvent {
-    (event: "status" | "error" | "done", listener: () => void): void;
+    (event: "status" | "error", listener: (s: string) => void): void;
+    (event: "done", listener: () => void): void;
 }
 
 export interface IRunner extends IEventProvider<IRunnerEvents> {

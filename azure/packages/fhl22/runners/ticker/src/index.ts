@@ -39,7 +39,7 @@ export class TickerRunner extends TypedEventEmitter<IRunnerEvents> implements IR
     }
 
     private async tick(): Promise<void>  {
-        this.emit("event", this.c.msgEndTicking);
+        this.emit("status", this.c.msgEndTicking);
         await delay(this.c.msBetweenTicks);
     }
 }
