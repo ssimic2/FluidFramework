@@ -11,7 +11,7 @@
   "license": "MIT",
   "author": "Microsoft and contributors",
   "scripts": {
-    "build": "npm run policy-check && npm run layer-check && npm run build:genver && npm run format && npm run build:compile && npm run lint && npm run build:docs",
+    "build": "npm run layer-check && npm run build:genver && npm run format && npm run build:compile && npm run lint && npm run build:docs",
     "build:ci": "npm run build:genver && lerna run build:compile --stream",
     "build:compile": "lerna run build:compile --stream",
     "build:docs": "npm run build:docs:api-extractor && npm run build:docs:copy-metadata",
@@ -37,8 +37,6 @@
     "lerna": "lerna",
     "lint": "lerna run lint --no-sort --stream -- -- -- --color",
     "lint:fix": "lerna run lint:fix --no-sort --stream -- -- -- --color",
-    "policy-check": "fluid-repo-policy-check",
-    "policy-check:fix": "fluid-repo-policy-check -r",
     "post-lerna-install:default": "[ -f package-lock.json ] && mv package-lock.json lerna-package-lock.json; [ -f package-lock.json.bak ] && mv package-lock.json.bak package-lock.json; exit 0",
     "post-lerna-install:win32": "if exist package-lock.json move package-lock.json lerna-package-lock.json && if exist package-lock.json.bak move package-lock.json.bak package-lock.json",
     "postinstall:lerna": "run-script-os",
