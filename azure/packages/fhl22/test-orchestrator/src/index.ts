@@ -28,8 +28,8 @@ export async function run(): Promise<void> {
 }
 
 export async function runStage(runner: IRunner): Promise<void> {
-    runner.on("status", (e) => {console.log("ticker event:", e)})
-    runner.on("done", () => {console.log("ticker done")})
+    runner.on("status", (e) => {console.log("stage event:", e)})
+    runner.on("done", () => {console.log("stage done")})
     await runner.run()
 }
 
