@@ -15,4 +15,20 @@
       msBetweenTicks: 500
       msgOnTick: "I am another tick"
       msgEndTicking: "I am also done ticking"
+  - task-3:
+    name: Here is the task 3
+    package: "container"
+    params:
+      id: 1
+      layout: "SharedMap"
+      text: "SharedString"
+      isCreate: true
+  - task-4:
+    name: Here is the task 3
+    package: "container"
+    params:
+      id: 2
+      layout: "SharedMap"
+      text: "SharedString"
+      isCreate: false
 

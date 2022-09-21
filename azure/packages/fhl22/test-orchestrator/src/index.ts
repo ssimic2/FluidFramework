@@ -28,6 +28,9 @@ try {
             }).catch((error) => {
                 console.log("error", error);
             });
+        } else if (item.package === "container") {
+            const container = new ContainerRunner(item.params as ContainerConfig);
+            console.log("Container Detected!")
         } else {
            console.log("unknown stage-----", item)
         }
