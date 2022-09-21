@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as yaml from "js-yaml";
 
 import { TickerConfig, TickerRunner } from "@fluidframework/runner-ticker"
+import { RunnerConfig } from "@fluidframework/runner-container"
 
 export interface IStage {
     name: string;

@@ -28,6 +28,7 @@
   "dependencies": {
     "@fluidframework/common-definitions": "^0.20.1",
     "@fluidframework/runner-ticker": "^1.0.0",
+    "@fluidframework/runner-container": "^1.0.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

@@ -2,8 +2,10 @@ import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 export interface ContainerConfig {
+    id: number,
     layout: string,
-    text: string
+    text: string,
+    isCreate: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -22,22 +24,18 @@ export class ContainerRunner extends TypedEventEmitter<IRunnerEvents> implements
     }
 
     public async run(): Promise<void> {
-        return this.tickDown(this.c.layout);
+        return this.createContainer(this.c.isCreate)
     }
 
     public stop(): void {
-        console.log("stop");
+        console.log("stop")
     }
 
-    private async tickDown(ticks: number): Promise<void> {
-        for(let i = 0; i < ticks; i++) {
-            await this.tick(100)
+    private async createContainer(isCreate: boolean): Promise<void> {
+        if (isCreate === true) {
+            console.log("Create Container Success")
+        } else {
+            console.log("Create Container Fail")
         }
-        this.emit("done", this.c.msgEndTicking);
-    }
-
-    private async tick(): Promise<void>  {
-        this.emit("event", this.c.msgEndTicking);
-        await delay(this.c.text);
     }
 }
