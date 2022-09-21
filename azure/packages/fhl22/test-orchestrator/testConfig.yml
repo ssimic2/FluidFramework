@@ -3,7 +3,7 @@
     name: Here is the task 1
     package: "ticker"
     params:
-      totalTicks: 10
+      totalTicks: 2
       msBetweenTicks: 1000
       msgOnTick: "I am ticking every 1000ms"
       msgEndTicking: "I done ticking"
@@ -11,8 +11,25 @@
     name: Here is the task 2
     package: "ticker"
     params:
-      totalTicks: 10
+      totalTicks: 2
       msBetweenTicks: 500
       msgOnTick: "I am ticking every 500ms"
       msgEndTicking: "I am also done ticking"
-
+  - task-3:
+    name: Create azure client
+    package: azureFactory
+    out: $(Client1)
+    params:
+      type: local
+      tenantId: c099dce7-de5b-4846-b41c-a3c7b090c416;
+      endpoint: https://us.fluidrelay.azure.com;
+      key: 717ce3576ef04a60650f16ea0d7a81e3;
+      funTokenProvider: https://scottntestazuretokengen.azurewebsites.ne;
+      userId: SomeUserId;
+      userName: SomeName;
+  - task-4:
+    name: Create container
+    package: containerFactory
+    out: $(Container1)
+    params:
+      client: $(Client1)

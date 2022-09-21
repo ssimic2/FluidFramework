@@ -9,6 +9,6 @@ export interface IRunnerEvents extends IEvent {
 }
 
 export interface IRunner extends IEventProvider<IRunnerEvents> {
-    run(): Promise<void>;
+    run(): Promise<unknown>;
     stop(): void;
 }
