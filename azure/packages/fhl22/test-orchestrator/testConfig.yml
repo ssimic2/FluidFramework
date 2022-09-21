@@ -5,14 +5,14 @@
     params:
       totalTicks: 10
       msBetweenTicks: 1000
-      msgOnTick: "I am a tick"
-      msgEndTicking: "I am done ticking"
+      msgOnTick: "I am ticking every 1000ms"
+      msgEndTicking: "I done ticking"
   - task-2:
     name: Here is the task 2
     package: "ticker"
     params:
       totalTicks: 10
       msBetweenTicks: 500
-      msgOnTick: "I am another tick"
+      msgOnTick: "I am ticking every 500ms"
       msgEndTicking: "I am also done ticking"
 

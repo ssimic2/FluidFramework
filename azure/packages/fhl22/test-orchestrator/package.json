@@ -27,6 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "@fluidframework/common-definitions": "^0.20.1",
+    "@fluidframework/runner-interface": "^1.1.0",
     "@fluidframework/runner-ticker": "^1.1.0",
     "js-yaml": "^4.1.0"
   },
