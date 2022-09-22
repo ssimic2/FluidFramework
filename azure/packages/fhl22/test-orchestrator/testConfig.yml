@@ -1,13 +1,15 @@
  stages:
   - task-1:
+    id: 1
     name: Here is the task 1
     package: "ticker"
     params:
-      totalTicks: 1
+      totalTicks: 5
       msBetweenTicks: 1000
       msgOnTick: "I am ticking every 1000ms"
       msgEndTicking: "I done ticking"
   - task-2:
+    id: 2
     name: Here is the task 2
     package: "ticker"
     params:
@@ -16,6 +18,7 @@
       msgOnTick: "I am ticking every 500ms"
       msgEndTicking: "I am also done ticking"
   - task-3:
+    id: 3
     name: Create azure client
     package: azureFactory
     out: $(Client1)
@@ -25,6 +28,7 @@
       userId: SomeUserId;
       userName: SomeName;
   - task-4:
+    id: 4
     name: Create container
     package: containerFactory
     out: $(Container1)
@@ -34,6 +38,7 @@
         key1: SharedMap
         key2: SharedMap
   - task-5:
+    id: 5
     name: Create traffic
     package: containerTrafficRunner
     params:
@@ -56,6 +61,7 @@
       flushAfterAction: true
       flushAfterRun: true
   - task-6:
+    id: 6
     name: Validate traffic
     package: containerTrafficValidator
     params:

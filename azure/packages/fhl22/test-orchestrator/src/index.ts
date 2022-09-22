@@ -18,6 +18,8 @@ export interface IStageParams {
     [key: string]: unknown;
 }
 export interface IStage {
+    id: number;
+    description?: string;
     name: string;
     package: string;
     params: IStageParams;
@@ -36,8 +38,19 @@ export interface VersionedRunConfig {
 export interface TestOrchestratorConfig {
     version: string;
 }
+
+export type StageStatus = "notstarted" | "running" | "success" | "error";
+export interface IStageStatus{
+    id: number;
+    title: string;
+    description?: string;
+    status: StageStatus;
+    details: unknown;
+}
+
 export class TestOrchestrator {
     private readonly env = new Map<string, unknown>();
+    private readonly stageStatus = new Map<number, IStageStatus>();
     private readonly c: TestOrchestratorConfig;
 
     constructor(config: TestOrchestratorConfig) {
@@ -63,13 +76,21 @@ export class TestOrchestrator {
             this.fillEnvForStage(stage.params);
             const runner = this.createRunner(stage);
             if (runner) {
-                const r = await this.runStage(runner);
+                const r = await this.runStage(runner, stage);
                 if (r !== undefined && stage.out !== undefined) {
                     this.env.set(stage.out, r);
                 }
                 console.log("done with stage", stage.name);
             }
         }
+    }
+
+    public getStatus(): IStageStatus[] {
+        const r: IStageStatus[] = [];
+        for(const [, value] of this.stageStatus) {
+            r.push(value)
+        }
+        return r.sort((a, b) => a.id < b.id ? -1 : 1);
     }
 
     private fillEnvForStage(params: IStageParams): void {
@@ -108,9 +129,16 @@ export class TestOrchestrator {
         }
     }
 
-    private async runStage(runner: IRunner): Promise<unknown> {
+    private async runStage(runner: IRunner, stage: IStage): Promise<unknown> {
         runner.on("status", (e) => {
-            console.log("stage event:", e);
+            this.stageStatus.set(stage.id, {
+                id: stage.id,
+                title: stage.name,
+                description: stage.description,
+                status: e.status,
+                details: e.details,
+            })
+            console.log("stage event->:", this.stageStatus);
         });
         runner.on("done", () => {
             console.log("stage done");
@@ -136,11 +164,11 @@ export class TestOrchestrator {
     }
 }
 
-// const o = new TestOrchestrator()
-// o.run()
-//     .then(() => {
-//         console.log("done---");
-//     })
-//     .catch((error) => {
-//         console.log("error", error);
-//     });
+const o = new TestOrchestrator({version: "v1"})
+o.run()
+    .then(() => {
+        console.log("done---");
+    })
+    .catch((error) => {
+        console.log("error", error);
+    });
