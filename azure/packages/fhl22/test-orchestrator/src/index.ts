@@ -28,31 +28,37 @@ export interface RunConfig {
     stages: IStage[];
 }
 
-export interface RunConfigs {
+export interface VersionedRunConfig {
     version: string;
     config: RunConfig;
 }
 
+export interface TestOrchestratorConfig {
+    version: string;
+}
 export class TestOrchestrator {
     private readonly env = new Map<string, unknown>();
+    private readonly c: TestOrchestratorConfig;
 
-    public static getConfigs(): RunConfigs[] {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const doc1 = yaml.load(fs.readFileSync("./testConfig.yml", "utf8")) as RunConfig;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const doc2 = yaml.load(fs.readFileSync("./testConfig.yml", "utf8")) as RunConfig;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const doc3 = yaml.load(fs.readFileSync("./testConfig.yml", "utf8")) as RunConfig;
+    constructor(config: TestOrchestratorConfig) {
+        this.c = config;
+    }
+
+    public static getConfigs(): VersionedRunConfig[] {
         return [
-            { version: "v1", config: doc1 },
-            { version: "v2", config: doc2 },
-            { version: "v3", config: doc3 },
+            { version: "v1", config: this.getConfig("v1") },
+            { version: "v2", config: this.getConfig("v2") },
+            { version: "v3", config: this.getConfig("v3") },
         ];
     }
 
+    public static getConfig(version: string): RunConfig {
+        return yaml.load(fs.readFileSync(this.getConfigFileName(version), "utf8")) as RunConfig;
+    }
+
     public async run(): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const doc = yaml.load(fs.readFileSync("./testConfig.yml", "utf8")) as RunConfig;
+        console.log("running config version:", this.c.version)
+        const doc = TestOrchestrator.getConfig(this.c.version)
         for (const stage of doc.stages) {
             this.fillEnvForStage(stage.params);
             const runner = this.createRunner(stage);
@@ -110,6 +116,23 @@ export class TestOrchestrator {
             console.log("stage done");
         });
         return runner.run();
+    }
+
+    private static getConfigFileName(version: string): string {
+        switch (version) {
+            case "v1": {
+                return "./testConfig.yml"
+            }
+            case "v2": {
+                return "./testConfig.yml"
+            }
+            case "v3": {
+                return "./testConfig.yml"
+            }
+            default: {
+                return ""
+            }
+        }
     }
 }
 
