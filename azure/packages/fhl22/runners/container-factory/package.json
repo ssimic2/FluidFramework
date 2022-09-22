@@ -1,5 +1,5 @@
 {
-  "name": "@fluidframework/test-orchestrator",
+  "name": "@fluidframework/container-factory",
   "version": "1.1.0",
   "description": "",
   "main": "dist/index.js",
@@ -26,16 +26,17 @@
   "author": "Microsoft and contributors",
   "license": "MIT",
   "dependencies": {
-    "@fluidframework/common-definitions": "^0.20.1",
-    "@fluidframework/container-factory": "^1.1.0",
+    "@fluidframework/azure-client": "^1.1.0",
+    "@fluidframework/common-utils": "^1.0.0",
+    "@fluidframework/fluid-static": "^1.0.1",
+    "@fluidframework/map": "^1.0.1",
     "@fluidframework/runner-interface": "^1.1.0",
-    "@fluidframework/runner-ticker": "^1.1.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@fluidframework/eslint-config-fluid": "^1.0.0",
+    "@fluidframework/test-client-utils": "^1.0.1",
     "@rushstack/eslint-config": "^2.5.1",
-    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
     "@types/node": "^14.18.0",
     "@types/random-js": "^1.0.31",
