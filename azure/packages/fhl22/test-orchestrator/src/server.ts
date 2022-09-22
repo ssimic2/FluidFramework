@@ -8,8 +8,12 @@ console.log("server running");
 const runs = new Map<string, TestOrchestrator>();
 const validConfigVersions = new Set(["v1", "v2", "v3"]);
 http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/html" }); // http header
-    if (req.url === undefined) {
+    const headers ={
+        'Content-Type': 'text/html',
+        'Access-Control-Allow-Origin': '*'
+    }
+    res.writeHead(200, headers); // http header
+    if(req.url === undefined) {
         res.end();
         return;
     }
