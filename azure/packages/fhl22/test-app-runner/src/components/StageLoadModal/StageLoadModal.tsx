@@ -32,11 +32,8 @@ export default function StageLoadModal() {
     }
 
     const handleSubmit = () => {
-        console.log("INPUT SUBMITTED: ", input);
         const doc = new YAML.Document()
         doc.contents = input
-        console.log("YAML INPUT: ", doc.toString());
-        console.log("stringify: ", YAML.stringify(input))
         handleClose();
     }
 

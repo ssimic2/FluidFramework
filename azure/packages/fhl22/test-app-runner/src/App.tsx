@@ -2,12 +2,12 @@ import React from 'react';
 import './App.css';
 import StatusDisplay from './components/StatusDisplay/StatusDisplay';
 import StatusContainer from './components/StatusContainer/StatusContainer';
-import HeaderButtons from './components/HeaderButtons/HeaderButtons';
+import StageLoadModal from "./components/StageLoadModal/StageLoadModal";
 
 function App() {
   return (
     <div className="App">
-        <HeaderButtons/>
+        <StageLoadModal/>
         <StatusDisplay/>
         <StatusContainer/>
     </div>

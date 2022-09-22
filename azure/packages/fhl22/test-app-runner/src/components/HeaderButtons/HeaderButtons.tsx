@@ -1,13 +1,11 @@
 import React from "react";
 import { Button } from '@mui/material';
-import StageLoadModal from "../StageLoadModal/StageLoadModal";
 
 function FileCollect() {
     return (
         <div>
-            <Button variant="contained">Start</Button>
-            <Button variant="contained">Stop</Button>
-            <StageLoadModal/>
+            <Button variant="contained" sx={{marginRight: '1rem'}}>Start</Button>
+            <Button variant="contained" className="startStopButton">Stop</Button>
         </div>
     )
 }

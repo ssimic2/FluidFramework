@@ -16,6 +16,7 @@
     "@types/react": "^18.0.20",
     "@types/react-dom": "^18.0.6",
     "ace-builds": "^1.11.0",
+    "axios": "^0.26.0",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
@@ -31,12 +32,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

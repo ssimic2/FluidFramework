@@ -7,7 +7,11 @@ console.log("server running");
 
 const runs = new Map<string, TestOrchestrator>();
 http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/html" }); // http header
+    const headers ={
+        'Content-Type': 'text/html',
+        'Access-Control-Allow-Origin': '*'
+    }
+    res.writeHead(200, headers); // http header
     if(req.url === undefined) {
         res.end();
         return;
