@@ -2,6 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
+import YAML from 'yaml';
 
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
@@ -32,6 +33,10 @@ export default function StageLoadModal() {
 
     const handleSubmit = () => {
         console.log("INPUT SUBMITTED: ", input);
+        const doc = new YAML.Document()
+        doc.contents = input
+        console.log("YAML INPUT: ", doc.toString());
+        console.log("stringify: ", YAML.stringify(input))
         handleClose();
     }
 
