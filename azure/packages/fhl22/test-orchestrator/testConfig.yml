@@ -3,7 +3,7 @@
     name: Here is the task 1
     package: "ticker"
     params:
-      totalTicks: 2
+      totalTicks: 1
       msBetweenTicks: 1000
       msgOnTick: "I am ticking every 1000ms"
       msgEndTicking: "I done ticking"
@@ -11,7 +11,7 @@
     name: Here is the task 2
     package: "ticker"
     params:
-      totalTicks: 2
+      totalTicks: 1
       msBetweenTicks: 500
       msgOnTick: "I am ticking every 500ms"
       msgEndTicking: "I am also done ticking"
@@ -56,7 +56,7 @@
       flushAfterAction: true
       flushAfterRun: true
   - task-6:
-    name: Create traffic
+    name: Validate traffic
     package: containerTrafficValidator
     params:
       client: $(Client1)
