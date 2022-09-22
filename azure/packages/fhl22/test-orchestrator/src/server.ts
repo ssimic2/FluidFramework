@@ -17,6 +17,10 @@ http.createServer((req, res) => {
     if (method === "GET") {
         if (parsedUrl.pathname === "/configs") {
             res.write(JSON.stringify(TestOrchestrator.getConfigs()));
+        } if (parsedUrl.pathname === "/run") {
+            const o = runs.get(parsedUrl.query.id as string);
+            const status = o?.getStatus();
+            console.log("status", status);
         } else {
             res.write("<h1>POLLING DATA!<h1>"); // write a response
         }
@@ -38,3 +42,4 @@ http.createServer((req, res) => {
 }).listen(8080, () => {
     console.log("server start at port 8080"); // the server object listens on port 3000
 });
+

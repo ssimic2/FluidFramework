@@ -1,4 +1,7 @@
-import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
+import {
+    IRunner,
+    IRunnerEvents
+} from "@fluidframework/runner-interface";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 export interface TickerConfig {
@@ -12,9 +15,9 @@ export interface TickerConfig {
 const delay = async (time: number | undefined) => {
     // eslint-disable-next-line promise/param-names
     return new Promise((res) => {
-      setTimeout(res, time);
+        setTimeout(res, time);
     });
-  };
+};
 
 export class TickerRunner extends TypedEventEmitter<IRunnerEvents> implements IRunner {
     private readonly c: TickerConfig;
@@ -32,14 +35,19 @@ export class TickerRunner extends TypedEventEmitter<IRunnerEvents> implements IR
     }
 
     private async tickDown(ticks: number): Promise<void> {
-        for(let i = 0; i < ticks; i++) {
-            await this.tick()
+        for (let i = 0; i < ticks; i++) {
+            await this.tick(i+1);
         }
         this.emit("done", this.c.msgEndTicking);
     }
 
-    private async tick(): Promise<void>  {
-        this.emit("status", this.c.msgOnTick);
+    private async tick(idx: number): Promise<void> {
+        this.emit("status", {
+            status: "running",
+            details: {
+                ticks: idx,
+            }
+        });
         await delay(this.c.msBetweenTicks);
     }
 }
