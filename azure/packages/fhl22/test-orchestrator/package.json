@@ -31,7 +31,8 @@
     "@fluidframework/container-factory": "^1.1.0",
     "@fluidframework/runner-interface": "^1.1.0",
     "@fluidframework/runner-ticker": "^1.1.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@fluidframework/eslint-config-fluid": "^1.0.0",
