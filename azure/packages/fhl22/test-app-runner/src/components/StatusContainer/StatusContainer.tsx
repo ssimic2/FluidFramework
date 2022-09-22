@@ -3,7 +3,6 @@ import StatusDisplay from '../StatusDisplay/StatusDisplay'
 import SampleData from '../../api/sample-data/sample-data.json'
 
 function StatusContainer() {
-
     useEffect(() => {
         console.log("running")
     }, []);
