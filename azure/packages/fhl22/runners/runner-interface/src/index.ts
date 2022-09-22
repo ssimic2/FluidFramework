@@ -6,6 +6,7 @@ import {
 export type RunnnerStatus = "notstarted" | "running" | "success" | "error";
 export interface IRunnerStatus{
     status: RunnnerStatus;
+    description?: string;
     details: unknown;
 }
 
@@ -16,5 +17,6 @@ export interface IRunnerEvents extends IEvent {
 
 export interface IRunner extends IEventProvider<IRunnerEvents> {
     run(): Promise<unknown>;
+    getStatus(): IRunnerStatus;
     stop(): void;
 }

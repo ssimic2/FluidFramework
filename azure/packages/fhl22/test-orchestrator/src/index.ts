@@ -130,11 +130,22 @@ export class TestOrchestrator {
     }
 
     private async runStage(runner: IRunner, stage: IStage): Promise<unknown> {
+        // Initial status
+        const initStatus = runner.getStatus()
+        this.stageStatus.set(stage.id, {
+            id: stage.id,
+            title: stage.name,
+            description: initStatus?.description ?? stage.description,
+            status: initStatus.status,
+            details: initStatus.details,
+        });
+
+        // Handle events
         runner.on("status", (e) => {
             this.stageStatus.set(stage.id, {
                 id: stage.id,
                 title: stage.name,
-                description: stage.description,
+                description: e?.description ?? stage.description,
                 status: e.status,
                 details: e.details,
             })
@@ -143,6 +154,8 @@ export class TestOrchestrator {
         runner.on("done", () => {
             console.log("stage done");
         });
+
+        // exec
         return runner.run();
     }
 
@@ -164,11 +177,11 @@ export class TestOrchestrator {
     }
 }
 
-const o = new TestOrchestrator({version: "v1"})
-o.run()
-    .then(() => {
-        console.log("done---");
-    })
-    .catch((error) => {
-        console.log("error", error);
-    });
+// const o = new TestOrchestrator({version: "v1"})
+// o.run()
+//     .then(() => {
+//         console.log("done---");
+//     })
+//     .catch((error) => {
+//         console.log("error", error);
+//     });

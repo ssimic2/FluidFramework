@@ -4,7 +4,7 @@ import {
     AzureLocalConnectionConfig,
 } from "@fluidframework/azure-client";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
+import { IRunner, IRunnerEvents, IRunnerStatus } from "@fluidframework/runner-interface";
 import { generateTestUser, InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 export interface ICustomUserDetails {
@@ -53,10 +53,28 @@ export class AzureClientFactory extends TypedEventEmitter<IRunnerEvents> impleme
             connection: connectionConfig,
         };
 
-        return new AzureClient(clientProps);
+        const ac = new AzureClient(clientProps);
+        this.emit("status", {
+            status: "success",
+            description: this.description(),
+            details: {},
+        });
+        return ac;
+    }
+
+    public getStatus(): IRunnerStatus {
+        return {
+            status: "notstarted",
+            description: this.description(),
+            details: {},
+        };
     }
 
     public stop(): void {
         console.log("stop");
+    }
+
+    private description(): string {
+        return `Creating ${this.c.type} Azure Client pointing to: ${this.c.endpoint}`
     }
 }

@@ -4,7 +4,7 @@ import {
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { ContainerSchema } from "@fluidframework/fluid-static";
 import { SharedMap } from '@fluidframework/map';
-import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
+import { IRunner, IRunnerEvents, IRunnerStatus } from "@fluidframework/runner-interface";
 
 export interface ContainerFactoryConfig {
     client: AzureClient;
@@ -27,11 +27,28 @@ export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implement
         const ac = this.c.client;
         const r = await ac.createContainer(schema);
         const c = r.container;
-        return c.attach();
+        const id = await c.attach();
+        this.emit("status", {
+            status: "success",
+            description: this.description(),
+        });
+        return id;
     }
 
     public stop(): void {
         console.log("stop");
+    }
+
+    public getStatus(): IRunnerStatus {
+        return {
+            status: "notstarted",
+            description: this.description(),
+            details: {},
+        };
+    }
+
+    private description(): string {
+        return `This stage creates container for the given schema`
     }
 
     private loadInitialObjSchema(schema: ContainerSchema): void {

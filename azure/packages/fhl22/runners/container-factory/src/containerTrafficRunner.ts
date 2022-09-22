@@ -4,7 +4,7 @@ import {
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { SharedMap } from '@fluidframework/map';
-import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
+import { IRunner, IRunnerEvents, IRunnerStatus } from "@fluidframework/runner-interface";
 import { timeoutPromise } from "@fluidframework/test-utils";
 
 export interface ContainerTrafficAction {
@@ -51,6 +51,13 @@ export class ContainerTrafficRunner extends TypedEventEmitter<IRunnerEvents> imp
 
     public stop(): void {
         console.log("stop");
+    }
+
+    public getStatus(): IRunnerStatus {
+        return {
+            status: "notstarted",
+            details: {},
+        };
     }
 
     private runLocalAction(c: IFluidContainer, trafficAction: ContainerTrafficAction): void {

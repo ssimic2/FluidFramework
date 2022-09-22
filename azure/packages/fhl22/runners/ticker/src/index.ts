@@ -1,7 +1,4 @@
-import {
-    IRunner,
-    IRunnerEvents
-} from "@fluidframework/runner-interface";
+import { IRunner, IRunnerEvents, IRunnerStatus } from "@fluidframework/runner-interface";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 export interface TickerConfig {
@@ -30,23 +27,44 @@ export class TickerRunner extends TypedEventEmitter<IRunnerEvents> implements IR
         return this.tickDown(this.c.totalTicks);
     }
 
+    public getStatus(): IRunnerStatus {
+        return {
+            status: "notstarted",
+            description: this.description(),
+            details: {
+                ticks: this.c.totalTicks,
+            },
+        };
+    }
+
     public stop(): void {
         console.log("stop");
     }
 
     private async tickDown(ticks: number): Promise<void> {
         for (let i = 0; i < ticks; i++) {
-            await this.tick(i+1);
+            await this.tick(i + 1);
         }
-        this.emit("done", this.c.msgEndTicking);
+        this.emit("status", {
+            status: "success",
+            description: this.description(),
+            details: {
+                ticks,
+            },
+        });
+    }
+
+    private description(): string {
+        return `This stage run ${this.c.totalTicks} ticks, spaced ${this.c.msBetweenTicks}ms apart.`
     }
 
     private async tick(idx: number): Promise<void> {
         this.emit("status", {
             status: "running",
+            description: this.description(),
             details: {
                 ticks: idx,
-            }
+            },
         });
         await delay(this.c.msBetweenTicks);
     }
