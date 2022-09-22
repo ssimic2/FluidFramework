@@ -48,7 +48,7 @@ export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implement
     }
 
     private description(): string {
-        return `This stage creates container for the given schema`
+        return `This stage creates container for the given schema.`
     }
 
     private loadInitialObjSchema(schema: ContainerSchema): void {

@@ -62,6 +62,12 @@ export class ContainerTrafficValidator extends TypedEventEmitter<IRunnerEvents> 
         for(const action of this.c.actions) {
             await this.runLocalAction(r.container, action)
         }
+
+        this.emit("status", {
+            status: "success",
+            description: this.description(),
+            details: {},
+        });
         return;
     }
 
@@ -72,6 +78,7 @@ export class ContainerTrafficValidator extends TypedEventEmitter<IRunnerEvents> 
     public getStatus(): IRunnerStatus {
         return {
             status: "notstarted",
+            description: this.description(),
             details: {},
         };
     }
@@ -92,5 +99,9 @@ export class ContainerTrafficValidator extends TypedEventEmitter<IRunnerEvents> 
                 schema.initialObjects[k] = SharedMap;
             }
         }
+    }
+
+    private description(): string {
+        return `This stage validates traffic on a single container.`
     }
 }

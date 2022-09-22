@@ -46,6 +46,12 @@ export class ContainerTrafficRunner extends TypedEventEmitter<IRunnerEvents> imp
         await timeoutPromise(
             (resolve) => r.container.once("saved", () => resolve()),
             { durationMs: 10_000, errorMsg: "datastoreSaveAfterAttach timeout" });
+
+        this.emit("status", {
+            status: "success",
+            description: this.description(),
+            details: {},
+        });
         return;
     }
 
@@ -56,6 +62,7 @@ export class ContainerTrafficRunner extends TypedEventEmitter<IRunnerEvents> imp
     public getStatus(): IRunnerStatus {
         return {
             status: "notstarted",
+            description: this.description(),
             details: {},
         };
     }
@@ -74,5 +81,9 @@ export class ContainerTrafficRunner extends TypedEventEmitter<IRunnerEvents> imp
                 schema.initialObjects[k] = SharedMap;
             }
         }
+    }
+
+    private description(): string {
+        return `This stage runs traffic on a single container.`
     }
 }
