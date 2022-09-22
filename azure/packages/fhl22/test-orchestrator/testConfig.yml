@@ -21,10 +21,7 @@
     out: $(Client1)
     params:
       type: local
-      tenantId: c099dce7-de5b-4846-b41c-a3c7b090c416;
-      endpoint: https://us.fluidrelay.azure.com;
-      key: 717ce3576ef04a60650f16ea0d7a81e3;
-      funTokenProvider: https://scottntestazuretokengen.azurewebsites.ne;
+      endpoint: http://localhost:7070
       userId: SomeUserId;
       userName: SomeName;
   - task-4:
@@ -33,3 +30,48 @@
     out: $(Container1)
     params:
       client: $(Client1)
+      initialObjects:
+        key1: SharedMap
+        key2: SharedMap
+  - task-5:
+    name: Create traffic
+    package: containerTrafficRunner
+    params:
+      client: $(Client1)
+      docId: $(Container1)
+      initialObjects:
+        key1: SharedMap
+        key2: SharedMap
+      actions:
+      - action1:
+        action: set
+        target: key1
+        key: a
+        value: test1
+      - action2:
+        action: set
+        target: key2
+        key: b
+        value: test2
+      flushAfterAction: true
+      flushAfterRun: true
+  - task-6:
+    name: Create traffic
+    package: containerTrafficValidator
+    params:
+      client: $(Client1)
+      docId: $(Container1)
+      initialObjects:
+        key1: SharedMap
+        key2: SharedMap
+      actions:
+      - action1:
+        action: get
+        target: key1
+        key: a
+        expectedVal: test1
+      - action2:
+        action: get
+        target: key2
+        key: b
+        expectedVal: test2

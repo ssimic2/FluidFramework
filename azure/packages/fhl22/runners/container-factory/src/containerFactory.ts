@@ -2,13 +2,14 @@ import {
     AzureClient,
 } from "@fluidframework/azure-client";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IFluidContainer } from "@fluidframework/fluid-static";
+import { ContainerSchema } from "@fluidframework/fluid-static";
 import { SharedMap } from '@fluidframework/map';
 import { IRunner, IRunnerEvents } from "@fluidframework/runner-interface";
 
-
 export interface ContainerFactoryConfig {
     client: AzureClient;
+    initialObjects: {[key: string]: string},
+    dynamicObjects?: {[key: string]: string}
 }
 
 export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implements IRunner {
@@ -18,20 +19,26 @@ export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implement
         this.c = config;
     }
 
-    public async run(): Promise<IFluidContainer> {
-        const containerSchema = {
-            initialObjects: {
-                /* [id]: DataObject */
-                map1: SharedMap,
-                map2: SharedMap,
-            },
+    public async run(): Promise<string> {
+        const schema: ContainerSchema = {
+            initialObjects: {}
         };
+        this.loadInitialObjSchema(schema)
         const ac = this.c.client;
-        const r = await ac.createContainer(containerSchema);
-        return r.container;
+        const r = await ac.createContainer(schema);
+        const c = r.container;
+        return c.attach();
     }
 
     public stop(): void {
         console.log("stop");
+    }
+
+    private loadInitialObjSchema(schema: ContainerSchema): void {
+        for(const k of Object.keys(this.c.initialObjects)) {
+            if(this.c.initialObjects[k] === "SharedMap") {
+                schema.initialObjects[k] = SharedMap;
+            }
+        }
     }
 }

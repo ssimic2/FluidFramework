@@ -6,6 +6,10 @@ import {
     AzureClientFactoryConfig,
     ContainerFactory,
     ContainerFactoryConfig,
+    ContainerTrafficRunner,
+    ContainerTrafficRunnerConfig,
+    ContainerTrafficValidator,
+    ContainerTrafficValidatorConfig,
 } from "@fluidframework/container-factory";
 import { IRunner } from "@fluidframework/runner-interface";
 import { TickerConfig, TickerRunner } from "@fluidframework/runner-ticker";
@@ -37,6 +41,7 @@ export async function run(): Promise<void> {
             if (r !== undefined && stage.out !== undefined) {
                 env.set(stage.out, r);
             }
+            console.log("done with stage", stage.name);
         }
     }
 }
@@ -61,6 +66,16 @@ function createRunner(stage: IStage): IRunner | undefined {
         case "containerFactory": {
             return new ContainerFactory(stage.params as unknown as ContainerFactoryConfig);
         }
+        case "containerTrafficRunner": {
+            return new ContainerTrafficRunner(
+                stage.params as unknown as ContainerTrafficRunnerConfig,
+            );
+        }
+        case "containerTrafficValidator": {
+            return new ContainerTrafficValidator(
+                stage.params as unknown as ContainerTrafficValidatorConfig,
+            );
+        }
         default: {
             console.log("unknown stage:", stage);
         }
@@ -79,7 +94,7 @@ export async function runStage(runner: IRunner): Promise<unknown> {
 
 run()
     .then(() => {
-        console.log("done");
+        console.log("done---");
     })
     .catch((error) => {
         console.log("error", error);
