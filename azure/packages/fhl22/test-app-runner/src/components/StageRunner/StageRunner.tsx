@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import ReactJson from 'react-json-view';
 import { Accordion, AccordionSummary, Typography, AccordionDetails, Box, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TestApi from '../../api/api'
 import StatusDisplay from '../StatusDisplay/StatusDisplay'
 
-function VersionPreview({ data }:any) {
+function StageRunner({ data }:any) {
     const testApi = new TestApi();
     const [status, setStatus] = useState<any>('');
     const [pollingId, setPollingId] = useState<any>('');
@@ -33,7 +33,7 @@ function VersionPreview({ data }:any) {
 
     let statusDisplay;
     if (status) {
-        statusDisplay = <StatusDisplay data={status}/>
+        statusDisplay = <StatusDisplay data={status.stages}/>
     }
 
     return (
@@ -71,4 +71,4 @@ function VersionPreview({ data }:any) {
     );
 }
 
-export default VersionPreview
+export default StageRunner
