@@ -11,11 +11,15 @@ export interface ContainerValidatorAction {
     expectedVal: unknown;
 }
 
+export interface ContainerValidatorSchema {
+    initialObjects: {[key: string]: string},
+    dynamicObjects?: {[key: string]: string}
+}
+
 export interface ContainerTrafficValidatorConfig {
     client: AzureClient;
     docId: string;
-    initialObjects: { [key: string]: string };
-    dynamicObjects?: { [key: string]: string };
+    schema: ContainerValidatorSchema,
     actions: ContainerValidatorAction[];
     flushAfterAction: boolean;
     flushAfterRun: boolean;
@@ -106,8 +110,8 @@ export class ContainerTrafficValidator extends TypedEventEmitter<IRunnerEvents> 
     }
 
     private loadInitialObjSchema(schema: ContainerSchema): void {
-        for (const k of Object.keys(this.c.initialObjects)) {
-            if (this.c.initialObjects[k] === "SharedMap") {
+        for (const k of Object.keys(this.c.schema.initialObjects)) {
+            if (this.c.schema.initialObjects[k] === "SharedMap") {
                 schema.initialObjects[k] = SharedMap;
             }
         }

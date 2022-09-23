@@ -17,6 +17,9 @@ import { TickerConfig, TickerRunner } from "@fluidframework/runner-ticker";
 export interface IStageParams {
     [key: string]: unknown;
 }
+export interface IEnvVars {
+    [key: string]: unknown;
+}
 export interface IStage {
     id: number;
     description?: string;
@@ -27,6 +30,7 @@ export interface IStage {
 }
 
 export interface RunConfig {
+    env: IEnvVars;
     stages: IStage[];
 }
 
@@ -72,6 +76,11 @@ export class TestOrchestrator {
     public async run(): Promise<void> {
         console.log("running config version:", this.c.version)
         const doc = TestOrchestrator.getConfig(this.c.version)
+
+        for(const key of Object.keys(doc.env)) {
+            this.env.set(`\${${key}}`, doc.env[key]);
+        }
+
         for (const stage of doc.stages) {
             this.fillEnvForStage(stage.params);
             const runner = this.createRunner(stage);
@@ -181,11 +190,11 @@ export class TestOrchestrator {
     }
 }
 
-// const o = new TestOrchestrator({version: "v1"})
-// o.run()
-//     .then(() => {
-//         console.log("TestOrchestrator: done");
-//     })
-//     .catch((error) => {
-//         console.log("TestOrchestrator: error:", error);
-//     });
+const o = new TestOrchestrator({version: "v2"})
+o.run()
+    .then(() => {
+        console.log("TestOrchestrator: done");
+    })
+    .catch((error) => {
+        console.log("TestOrchestrator: error:", error);
+    });

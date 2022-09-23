@@ -6,10 +6,13 @@ import { ContainerSchema } from "@fluidframework/fluid-static";
 import { SharedMap } from '@fluidframework/map';
 import { IRunner, IRunnerEvents, IRunnerStatus } from "@fluidframework/runner-interface";
 
-export interface ContainerFactoryConfig {
-    client: AzureClient;
+export interface ContainerFactorySchema {
     initialObjects: {[key: string]: string},
     dynamicObjects?: {[key: string]: string}
+}
+export interface ContainerFactoryConfig {
+    client: AzureClient;
+    schema: ContainerFactorySchema,
 }
 
 export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implements IRunner {
@@ -52,8 +55,8 @@ export class ContainerFactory extends TypedEventEmitter<IRunnerEvents> implement
     }
 
     private loadInitialObjSchema(schema: ContainerSchema): void {
-        for(const k of Object.keys(this.c.initialObjects)) {
-            if(this.c.initialObjects[k] === "SharedMap") {
+        for(const k of Object.keys(this.c.schema.initialObjects)) {
+            if(this.c.schema.initialObjects[k] === "SharedMap") {
                 schema.initialObjects[k] = SharedMap;
             }
         }

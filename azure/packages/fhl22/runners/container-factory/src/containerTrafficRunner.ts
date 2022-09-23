@@ -14,11 +14,15 @@ export interface ContainerTrafficAction {
     value: unknown
 }
 
+export interface ContainerTrafficSchema {
+    initialObjects: {[key: string]: string},
+    dynamicObjects?: {[key: string]: string}
+}
+
 export interface ContainerTrafficRunnerConfig {
     client: AzureClient;
     docId: string;
-    initialObjects: {[key: string]: string},
-    dynamicObjects?: {[key: string]: string},
+    schema: ContainerTrafficSchema,
     actions: ContainerTrafficAction[],
     flushAfterAction: boolean,
     flushAfterRun: boolean,
@@ -76,8 +80,8 @@ export class ContainerTrafficRunner extends TypedEventEmitter<IRunnerEvents> imp
     }
 
     private loadInitialObjSchema(schema: ContainerSchema): void {
-        for(const k of Object.keys(this.c.initialObjects)) {
-            if(this.c.initialObjects[k] === "SharedMap") {
+        for(const k of Object.keys(this.c.schema.initialObjects)) {
+            if(this.c.schema.initialObjects[k] === "SharedMap") {
                 schema.initialObjects[k] = SharedMap;
             }
         }
