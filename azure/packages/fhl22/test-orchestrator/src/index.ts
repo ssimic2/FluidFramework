@@ -76,11 +76,15 @@ export class TestOrchestrator {
             this.fillEnvForStage(stage.params);
             const runner = this.createRunner(stage);
             if (runner) {
-                const r = await this.runStage(runner, stage);
-                if (r !== undefined && stage.out !== undefined) {
-                    this.env.set(stage.out, r);
+                try {
+                    const r = await this.runStage(runner, stage);
+                    if (r !== undefined && stage.out !== undefined) {
+                        this.env.set(stage.out, r);
+                    }
+                    console.log("done with stage", stage.name);
+                } catch(error) {
+                    console.log("stage existed with error:", stage.name, error);
                 }
-                console.log("done with stage", stage.name);
             }
         }
     }
@@ -165,10 +169,10 @@ export class TestOrchestrator {
                 return "./testConfig.yml"
             }
             case "v2": {
-                return "./testConfig.yml"
+                return "./testConfigV2.yml"
             }
             case "v3": {
-                return "./testConfig.yml"
+                return "./testConfigV3.yml"
             }
             default: {
                 return ""
@@ -180,8 +184,8 @@ export class TestOrchestrator {
 // const o = new TestOrchestrator({version: "v1"})
 // o.run()
 //     .then(() => {
-//         console.log("done---");
+//         console.log("TestOrchestrator: done");
 //     })
 //     .catch((error) => {
-//         console.log("error", error);
+//         console.log("TestOrchestrator: error:", error);
 //     });

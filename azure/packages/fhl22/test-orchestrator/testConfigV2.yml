@@ -80,4 +80,4 @@
         action: get
         target: key2
         key: b
-        expectedVal: test2
+        expectedVal: test400
