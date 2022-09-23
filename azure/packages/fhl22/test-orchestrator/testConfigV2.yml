@@ -1,3 +1,5 @@
+ title: Simple container traffic with failure.
+ description: In this scenario we create a container, run some traffic on it and validate outcome. We are failing the validation check on purpose.
  env:
     schema:
       initialObjects:

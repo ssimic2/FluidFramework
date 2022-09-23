@@ -30,6 +30,8 @@ export interface IStage {
 }
 
 export interface RunConfig {
+    title: string;
+    description: string;
     env: IEnvVars;
     stages: IStage[];
 }
@@ -43,7 +45,15 @@ export interface TestOrchestratorConfig {
     version: string;
 }
 
+export type RunStatus = "notstarted" | "running" | "done";
 export type StageStatus = "notstarted" | "running" | "success" | "error";
+
+export interface IRunStatus{
+    title: string;
+    description: string;
+    status: string;
+    stages: IStageStatus[];
+}
 export interface IStageStatus{
     id: number;
     title: string;
@@ -53,6 +63,8 @@ export interface IStageStatus{
 }
 
 export class TestOrchestrator {
+    private runStatus: RunStatus = "notstarted";
+    private doc: RunConfig | undefined;
     private readonly env = new Map<string, unknown>();
     private readonly stageStatus = new Map<number, IStageStatus>();
     private readonly c: TestOrchestratorConfig;
@@ -74,14 +86,15 @@ export class TestOrchestrator {
     }
 
     public async run(): Promise<void> {
+        this.runStatus = "running";
         console.log("running config version:", this.c.version)
-        const doc = TestOrchestrator.getConfig(this.c.version)
+        this.doc = TestOrchestrator.getConfig(this.c.version)
 
-        for(const key of Object.keys(doc.env)) {
-            this.env.set(`\${${key}}`, doc.env[key]);
+        for(const key of Object.keys(this.doc.env)) {
+            this.env.set(`\${${key}}`, this.doc.env[key]);
         }
 
-        for (const stage of doc.stages) {
+        for (const stage of this.doc.stages) {
             this.fillEnvForStage(stage.params);
             const runner = this.createRunner(stage);
             if (runner) {
@@ -93,17 +106,26 @@ export class TestOrchestrator {
                     console.log("done with stage", stage.name);
                 } catch(error) {
                     console.log("stage existed with error:", stage.name, error);
+                    break;
                 }
             }
         }
+        this.runStatus = "done";
     }
 
-    public getStatus(): IStageStatus[] {
+    public getStatus(): IRunStatus {
         const r: IStageStatus[] = [];
         for(const [, value] of this.stageStatus) {
             r.push(value)
         }
-        return r.sort((a, b) => a.id < b.id ? -1 : 1);
+        const stages = r.sort((a, b) => a.id < b.id ? -1 : 1);
+
+        return {
+            title: this.doc?.title ?? "title",
+            description: this.doc?.description ?? "description",
+            status: this.runStatus,
+            stages,
+        }
     }
 
     private fillEnvForStage(params: IStageParams): void {
@@ -190,11 +212,11 @@ export class TestOrchestrator {
     }
 }
 
-const o = new TestOrchestrator({version: "v2"})
-o.run()
-    .then(() => {
-        console.log("TestOrchestrator: done");
-    })
-    .catch((error) => {
-        console.log("TestOrchestrator: error:", error);
-    });
+// const o = new TestOrchestrator({version: "v1"})
+// o.run()
+//     .then(() => {
+//         console.log("TestOrchestrator: done");
+//     })
+//     .catch((error) => {
+//         console.log("TestOrchestrator: error:", error);
+//     });

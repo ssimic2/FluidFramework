@@ -1,3 +1,5 @@
+ title: Simple container traffic
+ description: In this scenario we create a container, run some traffic on it and validate outcome.
  env:
     schema:
       initialObjects:
@@ -7,6 +9,7 @@
   - task-1:
     id: 1
     name: Here is the task 1
+    description: This is the run we use to validate some basic DDS creation.
     package: "ticker"
     params:
       totalTicks: 5

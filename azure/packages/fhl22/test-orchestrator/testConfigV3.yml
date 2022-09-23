@@ -1,3 +1,5 @@
+ title: Another container traffic scenario
+ description: This is the dup of the first scenario for now
  env:
     schema:
       initialObjects:
