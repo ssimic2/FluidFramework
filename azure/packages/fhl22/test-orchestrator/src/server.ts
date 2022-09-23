@@ -23,7 +23,7 @@ http.createServer((req, res) => {
         if (parsedUrl.pathname === "/configs") {
             res.write(JSON.stringify(TestOrchestrator.getConfigs()));
         }
-        if (parsedUrl.pathname === "/run") {
+        else if (parsedUrl.pathname === "/run") {
             const o = runs.get(parsedUrl.query.id as string);
             const status = o?.getStatus() ?? { error: "cannot find the requested run" };
             res.write(JSON.stringify(status));
