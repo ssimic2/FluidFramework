@@ -18,7 +18,6 @@ function StatusContainer() {
     return (
         <div className="stock-container">
             {testData.map((data: any, key: any) => {
-                console.log("NEW DATA", data)
                 return(
                     <StageRunner data={data} key={key}/>
                 )
