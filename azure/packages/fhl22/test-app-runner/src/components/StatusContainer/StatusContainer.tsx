@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react"
-import StatusDisplay from '../StatusDisplay/StatusDisplay'
-import SampleData from '../../api/sample-data/sample-data.json'
-import VersionPreview from '../VersionPreview/VersionPreview'
+import StageRunner from '../StageRunner/StageRunner'
 import TestApi from '../../api/api'
 
 function StatusContainer() {
@@ -21,7 +19,7 @@ function StatusContainer() {
         <div className="stock-container">
             {testData.map((data: any, key: any) => {
                 return(
-                    <VersionPreview data={data} key={key}/>
+                    <StageRunner data={data} key={key}/>
                 )
             })}
         </div>
