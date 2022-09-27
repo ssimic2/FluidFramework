@@ -8,25 +8,6 @@
  stages:
   - task-1:
     id: 1
-    name: Here is the task 1
-    description: This is the run we use to validate some basic DDS creation.
-    package: "ticker"
-    params:
-      totalTicks: 5
-      msBetweenTicks: 1000
-      msgOnTick: "I am ticking every 1000ms"
-      msgEndTicking: "I done ticking"
-  - task-2:
-    id: 2
-    name: Here is the task 2
-    package: "ticker"
-    params:
-      totalTicks: 1
-      msBetweenTicks: 500
-      msgOnTick: "I am ticking every 500ms"
-      msgEndTicking: "I am also done ticking"
-  - task-3:
-    id: 3
     name: Create azure client
     package: azureFactory
     params:
@@ -35,16 +16,16 @@
       userId: SomeUserId;
       userName: SomeName;
     out: $(client1)
-  - task-4:
-    id: 4
+  - task-2:
+    id: 2
     name: Create container
     package: containerFactory
     params:
       client: $(client1)
       schema: ${schema}
     out: $(container1)
-  - task-5:
-    id: 5
+  - task-3:
+    id: 3
     name: Create traffic
     package: containerTrafficRunner
     params:
@@ -64,8 +45,17 @@
         value: test2
       flushAfterAction: true
       flushAfterRun: true
-  - task-6:
-    id: 6
+  - task-4:
+    id: 4
+    name: Delay for 5 secs
+    package: "ticker"
+    params:
+      totalTicks: 5
+      msBetweenTicks: 1000
+      msgOnTick: "I am ticking every 1000ms"
+      msgEndTicking: "I done ticking"
+  - task-5:
+    id: 5
     name: Validate traffic
     package: containerTrafficValidator
     params:

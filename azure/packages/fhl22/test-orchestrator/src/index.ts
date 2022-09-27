@@ -182,9 +182,10 @@ export class TestOrchestrator {
                 title: stage.name,
                 description: e?.description ?? stage.description,
                 status: e.status,
-                details: e.details,
+                details: JSON.stringify(e.details),
             })
-            console.log("stage event->:", this.stageStatus);
+            console.log("state change --------------->:");
+            console.log(this.getStatus())
         });
         runner.on("done", () => {
             console.log("stage done");
@@ -212,7 +213,7 @@ export class TestOrchestrator {
     }
 }
 
-// const o = new TestOrchestrator({version: "v1"})
+// const o = new TestOrchestrator({version: "v2"})
 // o.run()
 //     .then(() => {
 //         console.log("TestOrchestrator: done");
