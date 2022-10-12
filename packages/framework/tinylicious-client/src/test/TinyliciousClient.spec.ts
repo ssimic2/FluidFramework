@@ -11,7 +11,7 @@ import {
 import { IContainerRuntime } from "@fluidframework/container-runtime-definitions";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { SharedMap, SharedDirectory } from "@fluidframework/map";
-import { TinyliciousClient } from "..";
+import { ITinyliciousContainerEvents, TinyliciousClient } from "..";
 import { TestDataObject } from "./TestDataObject";
 
 const corruptedAliasOp = async (runtime: IContainerRuntime, alias: string): Promise<boolean | Error> =>
@@ -23,7 +23,7 @@ new Promise<boolean>((resolve, reject) => {
 const runtimeOf = (dataObject: TestDataObject): IContainerRuntime =>
     (dataObject as any).context.containerRuntime as IContainerRuntime;
 
-const allDataCorruption = async (containers: IFluidContainer[]) => Promise.all(
+const allDataCorruption = async (containers: IFluidContainer<ITinyliciousContainerEvents>[]) => Promise.all(
     containers.map(async (c) => new Promise<boolean>((resolve) => c.once("disposed", (error) => {
         resolve(error?.errorType === ContainerErrorType.dataCorruptionError);
     })))).then((all) => !all.includes(false));

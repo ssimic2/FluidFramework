@@ -4,9 +4,13 @@
 
 ```ts
 
+import { ContainerErrorType } from '@fluidframework/container-definitions';
 import { ContainerSchema } from '@fluidframework/fluid-static';
+import { DriverErrorType } from '@fluidframework/driver-definitions';
 import { IClient } from '@fluidframework/protocol-definitions';
+import { IErrorBase } from '@fluidframework/container-definitions';
 import { IFluidContainer } from '@fluidframework/fluid-static';
+import { IFluidContainerEvents } from '@fluidframework/fluid-static';
 import { IMember } from '@fluidframework/fluid-static';
 import { IServiceAudience } from '@fluidframework/fluid-static';
 import { ITelemetryBaseEvent } from '@fluidframework/common-definitions';
@@ -21,6 +25,17 @@ export { ITelemetryBaseLogger }
 // @public
 export type ITinyliciousAudience = IServiceAudience<TinyliciousMember>;
 
+// @public (undocumented)
+export interface ITinyliciousContainerEvents extends IFluidContainerEvents {
+    (event: "disposed", listener: (error?: ITinyliciousErrorBase) => void): any;
+}
+
+// @public (undocumented)
+export interface ITinyliciousErrorBase extends IErrorBase {
+    // (undocumented)
+    readonly errorType: ContainerErrorType | DriverErrorType;
+}
+
 // @public
 export class TinyliciousAudience extends ServiceAudience<TinyliciousMember> implements ITinyliciousAudience {
     // @internal (undocumented)
@@ -31,11 +46,11 @@ export class TinyliciousAudience extends ServiceAudience<TinyliciousMember> impl
 class TinyliciousClient {
     constructor(props?: TinyliciousClientProps | undefined);
     createContainer(containerSchema: ContainerSchema): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<ITinyliciousContainerEvents>;
         services: TinyliciousContainerServices;
     }>;
     getContainer(id: string, containerSchema: ContainerSchema): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<ITinyliciousContainerEvents>;
         services: TinyliciousContainerServices;
     }>;
 }

@@ -39,13 +39,13 @@ export class DOProviderContainerRuntimeFactory extends BaseContainerRuntimeFacto
 }
 
 // @public
-export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> implements IFluidContainer {
+export class FluidContainer<T extends IEvent = IFluidContainerEvents> extends TypedEventEmitter<T> implements IFluidContainer<T> {
     constructor(container: IContainer, rootDataObject: RootDataObject);
     attach(): Promise<string>;
     get attachState(): AttachState;
     connect(): Promise<void>;
     get connectionState(): ConnectionState;
-    create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
+    create<Y extends IFluidLoadable>(objectClass: LoadableObjectClass<Y>): Promise<Y>;
     disconnect(): Promise<void>;
     dispose(): void;
     get disposed(): boolean;
@@ -60,12 +60,12 @@ export interface IConnection {
 }
 
 // @public
-export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
+export interface IFluidContainer<T extends IEvent = IFluidContainerEvents> extends IEventProvider<T> {
     attach(): Promise<string>;
     readonly attachState: AttachState;
     connect(): void;
     readonly connectionState: ConnectionState;
-    create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
+    create<R extends IFluidLoadable>(objectClass: LoadableObjectClass<R>): Promise<R>;
     disconnect(): void;
     dispose(): void;
     readonly disposed: boolean;

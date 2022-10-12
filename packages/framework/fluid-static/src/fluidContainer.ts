@@ -44,7 +44,7 @@ export interface IFluidContainerEvents extends IEvent {
      *
      * @eventProperty
      */
-     (event: "saved", listener: () => void): void;
+    (event: "saved", listener: () => void): void;
 
     /**
      * Emitted when the {@link IFluidContainer} has local changes that have not yet been acknowledged by the service.
@@ -60,7 +60,8 @@ export interface IFluidContainerEvents extends IEvent {
  * Provides an entrypoint into the client side of collaborative Fluid data.
  * Provides access to the data as well as status on the collaboration session.
  */
-export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
+export interface IFluidContainer<T extends IEvent = IFluidContainerEvents>
+    extends IEventProvider<T> {
     /**
      * Provides the current connected state of the container
      */
@@ -163,7 +164,9 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
      *
      * @typeParam T - The class of the `DataObject` or `SharedObject`.
      */
-    create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T>;
+    create<R extends IFluidLoadable>(
+        objectClass: LoadableObjectClass<R>
+    ): Promise<R>;
 
     /**
      * Dispose of the container instance, permanently disabling it.
@@ -179,10 +182,13 @@ export interface IFluidContainer extends IEventProvider<IFluidContainerEvents> {
  * Note: this implementation is not complete. Consumers who rely on {@link IFluidContainer.attach}
  * will need to utilize or provide a service-specific implementation of this type that implements that method.
  */
-export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> implements IFluidContainer {
+export class FluidContainer<T extends IEvent = IFluidContainerEvents>
+    extends TypedEventEmitter<T>
+    implements IFluidContainer<T> {
     private readonly connectedHandler = () => this.emit("connected");
     private readonly disconnectedHandler = () => this.emit("disconnected");
-    private readonly disposedHandler = (error?: ICriticalContainerError) => this.emit("disposed", error);
+    private readonly disposedHandler = (error?: ICriticalContainerError) =>
+        this.emit("disposed", error);
     private readonly savedHandler = () => this.emit("saved");
     private readonly dirtyHandler = () => this.emit("dirty");
 
@@ -201,7 +207,7 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     /**
      * {@inheritDoc IFluidContainer.isDirty}
      */
-     public get isDirty(): boolean {
+    public get isDirty(): boolean {
         return this.container.isDirty;
     }
 
@@ -222,7 +228,7 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     /**
      * {@inheritDoc IFluidContainer.connectionState}
      */
-     public get connectionState(): ConnectionState {
+    public get connectionState(): ConnectionState {
         return this.container.connectionState;
     }
 
@@ -246,7 +252,9 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
      * but internally this separation is not there.
      */
     public async attach(): Promise<string> {
-        throw new Error("Cannot attach container. Container is not in detached state");
+        throw new Error(
+            "Cannot attach container. Container is not in detached state",
+        );
     }
 
     /**
@@ -266,7 +274,9 @@ export class FluidContainer extends TypedEventEmitter<IFluidContainerEvents> imp
     /**
      * {@inheritDoc IFluidContainer.create}
      */
-    public async create<T extends IFluidLoadable>(objectClass: LoadableObjectClass<T>): Promise<T> {
+    public async create<Y extends IFluidLoadable>(
+        objectClass: LoadableObjectClass<Y>,
+    ): Promise<Y> {
         return this.rootDataObject.create(objectClass);
     }
 
