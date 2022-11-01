@@ -194,7 +194,7 @@ export class AzureClient {
         });
     }
 
-    private getContainerServices(container: IContainer): AzureContainerServices {
+    protected getContainerServices(container: IContainer): AzureContainerServices {
         return {
             audience: new AzureAudience(container),
         };

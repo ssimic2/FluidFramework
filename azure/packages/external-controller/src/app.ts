@@ -10,7 +10,8 @@ import {
     AzureFunctionTokenProvider,
     AzureLocalConnectionConfig,
     AzureRemoteConnectionConfig,
-} from "@fluidframework/azure-client";
+} from "@fluidframework/azure-client-instrumented";
+import { ITelemetryBaseEvent, ITelemetryBaseLogger } from "@fluidframework/common-definitions";
 import { InsecureTokenProvider, generateTestUser } from "@fluidframework/test-client-utils";
 
 import { DiceRollerController, DiceRollerControllerProps } from "./controller";
@@ -47,7 +48,7 @@ const connectionConfig: AzureRemoteConnectionConfig | AzureLocalConnectionConfig
     : {
           type: "local",
           tokenProvider: new InsecureTokenProvider("fooBar", user),
-          endpoint: "http://localhost:7070",
+          endpoint: "http://localhost:54364",
       };
 
 // Define the schema of our Container.
@@ -60,6 +61,15 @@ const containerSchema = {
         map2: SharedMap,
     },
 };
+
+// Define a custom ITelemetry Logger. This logger will be passed into TinyliciousClient
+// and gets hooked up to the Tinylicious container telemetry system.
+export class ConsoleLogger implements ITelemetryBaseLogger {
+    constructor() {}
+    send(event: ITelemetryBaseEvent) {
+        console.log("Custom telemetry object array: ".concat(JSON.stringify(event)));
+    }
+}
 
 function createDiceRollerControllerProps(map: SharedMap): DiceRollerControllerProps {
     return {
@@ -109,7 +119,7 @@ async function start(): Promise<void> {
     const clientProps = {
         connection: connectionConfig,
     };
-    const client = new AzureClient(clientProps);
+    const client = new AzureClient(clientProps, new ConsoleLogger());
     let container: IFluidContainer;
     let services: AzureContainerServices;
     let id: string;

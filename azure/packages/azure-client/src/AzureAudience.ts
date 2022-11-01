@@ -23,7 +23,7 @@ export class AzureAudience extends ServiceAudience<AzureMember> implements IAzur
      *
      * @internal
      */
-    protected createServiceMember(audienceMember: IClient): AzureMember {
+    public createServiceMember(audienceMember: IClient): AzureMember {
         const azureUser = audienceMember.user as AzureUser;
         assert(azureUser?.name !== undefined, 'Provided user was not an "AzureUser".');
 

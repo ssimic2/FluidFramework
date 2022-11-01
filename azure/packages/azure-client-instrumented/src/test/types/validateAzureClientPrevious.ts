@@ -23,7 +23,6 @@ declare function get_old_ClassDeclaration_AzureAudience():
 declare function use_current_ClassDeclaration_AzureAudience(
     use: TypeOnly<current.AzureAudience>);
 use_current_ClassDeclaration_AzureAudience(
-    // @ts-expect-error compatibility expected to be broken
     get_old_ClassDeclaration_AzureAudience());
 
 /*
