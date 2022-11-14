@@ -59,6 +59,7 @@ export interface ITelemetryBaseLogger {
  */
 export interface ITelemetryGenericEvent extends ITelemetryProperties {
     eventName: string;
+    generalUse?: boolean;
     category?: TelemetryEventCategory;
 }
 
@@ -77,6 +78,71 @@ export interface ITelemetryErrorEvent extends ITelemetryProperties {
 export interface ITelemetryPerformanceEvent extends ITelemetryGenericEvent {
     duration?: number; // Duration of event (optional)
 }
+
+/**
+ * General-use event.Strongly typed events that consumers can understand and act on.
+ */
+export interface ITelemetryGeneraUseEventBase extends ITelemetryGenericEvent {
+    packageName: string;
+    className: string;
+    docId?: string;
+    clientId?: string;
+}
+
+/**
+ * General use API event. Generated to log a request received by your API.
+ */
+export interface ITelemetryGeneralUseApiEvent extends ITelemetryGeneraUseEventBase {
+    duration: number;
+    apiName: string;
+    status?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    details?: any;
+}
+
+/**
+ * General use Error event. Typically represents an exception that causes an operation to fail.
+ */
+export interface ITelemetryGeneralUseErrorEvent extends ITelemetryGeneraUseEventBase {
+    apiName?: string;
+    duration: number;
+    exceptionType: string; // Todo: should be typed
+    errorCode: string; //
+    message: string;
+    severityLevel: string; //
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stackTrace?: any;
+}
+
+/**
+ * General use dependency event. Represents a call from your app to an external service or storage.
+ */
+export interface ITelemetryGeneralUseDepenencyEvent extends ITelemetryGeneraUseEventBase {
+    apiName?: string;
+    duration: number;
+    exceptionType: string; // Todo: should be typed
+    errorCode: string; //
+    message: string;
+    severityLevel: string; //
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stackTrace?: any;
+}
+
+/**
+ * General use API event, capturing event firing on your class.
+ * (Need a better name)
+ */
+export interface ITelemetryGeneralUseClassEvent extends ITelemetryGeneraUseEventBase {
+    eventName: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    details?: any;
+}
+
+export type ITelemetryGeneralUseEvent =
+    | ITelemetryGeneralUseClassEvent
+    | ITelemetryGeneralUseDepenencyEvent
+    | ITelemetryGeneralUseErrorEvent
+    | ITelemetryGeneralUseClassEvent;
 
 /**
  * An error object that supports exporting its properties to be logged to telemetry
@@ -122,4 +188,12 @@ export interface ITelemetryLogger extends ITelemetryBaseLogger {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sendPerformanceEvent(event: ITelemetryPerformanceEvent, error?: any): void;
+
+    /**
+     * Send general use-telemetry event.
+     * Notes: We will consider breaking this further down
+     * @param event - Event to send
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sendGeneralUseEvent?(event: ITelemetryGeneralUseEvent, error?: any): void;
 }

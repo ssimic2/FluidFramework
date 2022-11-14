@@ -25,7 +25,7 @@ import { TypedEventEmitter } from '@fluidframework/common-utils';
 
 // @public
 export class BaseTelemetryNullLogger implements ITelemetryBaseLogger {
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
 }
 
 // @public
@@ -33,7 +33,7 @@ export class ChildLogger extends TelemetryLogger {
     // (undocumented)
     protected readonly baseLogger: ITelemetryBaseLogger;
     static create(baseLogger?: ITelemetryBaseLogger, namespace?: string, properties?: ITelemetryLoggerPropertyBags): TelemetryLogger;
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
 }
 
 // @public (undocumented)
@@ -47,7 +47,7 @@ export class DebugLogger extends TelemetryLogger {
     constructor(debug: IDebugger, debugErr: IDebugger, properties?: ITelemetryLoggerPropertyBags);
     static create(namespace: string, properties?: ITelemetryLoggerPropertyBags): TelemetryLogger;
     static mixinDebugLogger(namespace: string, baseLogger?: ITelemetryBaseLogger, properties?: ITelemetryLoggerPropertyBags): TelemetryLogger;
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
 }
 
 // @public (undocumented)
@@ -209,7 +209,7 @@ export class MultiSinkLogger extends TelemetryLogger {
     addLogger(logger?: ITelemetryBaseLogger): void;
     // (undocumented)
     protected loggers: ITelemetryBaseLogger[];
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
 }
 
 // @public
@@ -286,24 +286,28 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
     static numberFromString(str: string | null | undefined): string | number | undefined;
     static prepareErrorObject(event: ITelemetryBaseEvent, error: any, fetchStack: boolean): void;
     // (undocumented)
-    protected prepareEvent(event: ITelemetryBaseEvent): ITelemetryBaseEvent;
+    protected prepareEvent(event: ITelemetryBaseEvent, skipPropPrep?: boolean): ITelemetryBaseEvent;
     // (undocumented)
     protected readonly properties?: ITelemetryLoggerPropertyBags | undefined;
     // (undocumented)
     static sanitizePkgName(name: string): string;
-    abstract send(event: ITelemetryBaseEvent): void;
+    abstract send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
     sendErrorEvent(event: ITelemetryErrorEvent, error?: any): void;
+    // Warning: (ae-forgotten-export) The symbol "ITelemetryGeneralUseEvent" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    sendGeneralUseEvent(event: ITelemetryGeneralUseEvent, error?: any): void;
     sendPerformanceEvent(event: ITelemetryPerformanceEvent, error?: any): void;
     sendTelemetryEvent(event: ITelemetryGenericEvent, error?: any): void;
     protected sendTelemetryEventCore(event: ITelemetryGenericEvent & {
         category: TelemetryEventCategory;
-    }, error?: any): void;
+    }, error?: any, skipPropPrep?: boolean): void;
 }
 
 // @public
 export class TelemetryNullLogger implements ITelemetryLogger {
     // (undocumented)
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
     // (undocumented)
     sendErrorEvent(event: ITelemetryErrorEvent, error?: any): void;
     // (undocumented)
@@ -321,9 +325,11 @@ export class TelemetryUTLogger implements ITelemetryLogger {
     // (undocumented)
     logGenericError(eventName: string, error: any): void;
     // (undocumented)
-    send(event: ITelemetryBaseEvent): void;
+    send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
     // (undocumented)
     sendErrorEvent(event: ITelemetryErrorEvent, error?: any): void;
+    // (undocumented)
+    sendGeneralUseEvent(event: ITelemetryGeneralUseEvent, error?: any): void;
     // (undocumented)
     sendPerformanceEvent(event: ITelemetryPerformanceEvent, error?: any): void;
     // (undocumented)

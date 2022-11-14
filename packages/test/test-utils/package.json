@@ -105,6 +105,9 @@
   },
   "typeValidation": {
     "version": "2.0.0-internal.2.1.0",
-    "broken": {}
+    "broken": {
+      "ClassDeclaration_EventAndErrorTrackingLogger": {"forwardCompat": false},
+      "ClassDeclaration_TestObjectProvider": {"forwardCompat": false}
+    }
   }
 }

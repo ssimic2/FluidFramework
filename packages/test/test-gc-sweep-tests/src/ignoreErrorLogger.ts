@@ -18,7 +18,7 @@ export class IgnoreErrorLogger extends EventAndErrorTrackingLogger {
     public readonly errorEvents: ITelemetryBaseEvent[] = [];
     public readonly errorEventStats: { [key: string]: number; } = {};
 
-    public send(event: ITelemetryBaseEvent): void {
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
         this.events.push(event);
         if (event.eventName.includes("InactiveObject")) {
             this.inactiveObjectEvents.push(event);

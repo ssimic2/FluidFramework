@@ -28,6 +28,74 @@ import {
 } from "./errorLogging";
 
 /**
+ * General-use event.Strongly typed events that consumers can understand and act on.
+ */
+ export interface ITelemetryGeneraUseEventBase {
+    type: "api" | "service" | "event" | "error";
+    genUse: true;
+    eventName: string;
+    category: TelemetryEventCategory;
+    packageName: string;
+    className: string;
+    docId?: string;
+    clientId?: string;
+}
+
+/**
+ * General use API event. Generated to log a request received by your API.
+ */
+export interface ITelemetryGeneralUseApiEvent extends ITelemetryGeneraUseEventBase {
+    type: "api";
+    duration: number;
+    apiName: string;
+    status?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    details?: any;
+}
+
+/**
+ * General use Error event. Typically represents an exception that causes an operation to fail.
+ */
+export interface ITelemetryGeneralUseErrorEvent extends ITelemetryGeneraUseEventBase {
+    type: "error";
+    apiName?: string;
+    exceptionType: string; // Todo: should be typed
+    errorCode: string; //
+    message: string;
+    severityLevel: string; //
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stackTrace?: any;
+}
+
+/**
+ * General use dependency event. Represents a call from your app to an external service or storage.
+ */
+export interface ITelemetryGeneralUseServiceEvent extends ITelemetryGeneraUseEventBase {
+    type: "service";
+    duration: number;
+    id?: string; // Identifier of a dependency call instance.
+    target: string; // Target site of a dependency call. Examples are server name, host address.
+    resultCode: string; // Ex: HTTP status code
+    success: boolean;
+}
+
+/**
+ * General use API event, capturing event firing on your class.
+ * (Need a better name)
+ */
+export interface ITelemetryGeneralUseClassEvent extends ITelemetryGeneraUseEventBase {
+    type: "event";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    details?: any;
+}
+
+export type ITelemetryGeneralUseEvent =
+    | ITelemetryGeneralUseApiEvent
+    | ITelemetryGeneralUseServiceEvent
+    | ITelemetryGeneralUseErrorEvent
+    | ITelemetryGeneralUseClassEvent;
+
+/**
  * Broad classifications to be applied to individual properties as they're prepared to be logged to telemetry.
  * Please do not modify existing entries for backwards compatibility.
  */
@@ -120,7 +188,7 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
      *
      * @param event - the event to send
      */
-    public abstract send(event: ITelemetryBaseEvent): void;
+    public abstract send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void;
 
     /**
      * Send a telemetry event with the logger
@@ -140,7 +208,8 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
      */
      protected sendTelemetryEventCore(
         event: ITelemetryGenericEvent & { category: TelemetryEventCategory; },
-        error?: any) {
+        error?: any,
+        skipPropPrep?: boolean) {
         const newEvent = { ...event };
         if (error !== undefined) {
             TelemetryLogger.prepareErrorObject(newEvent, error, false);
@@ -151,7 +220,7 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
             newEvent.duration = TelemetryLogger.formatTick(newEvent.duration);
         }
 
-        this.send(newEvent);
+        this.send(newEvent, skipPropPrep);
     }
 
     /**
@@ -185,7 +254,7 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
         this.sendTelemetryEventCore(perfEvent, error);
     }
 
-    protected prepareEvent(event: ITelemetryBaseEvent): ITelemetryBaseEvent {
+    protected prepareEvent(event: ITelemetryBaseEvent, skipPropPrep?: boolean): ITelemetryBaseEvent {
         const includeErrorProps = event.category === "error" || event.error !== undefined;
         const newEvent: ITelemetryBaseEvent = {
             ...event,
@@ -193,7 +262,7 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
         if (this.namespace !== undefined) {
             newEvent.eventName = `${this.namespace}${TelemetryLogger.eventNamespaceSeparator}${newEvent.eventName}`;
         }
-        if (this.properties) {
+        if (this.properties && !skipPropPrep) {
             const properties: (undefined | ITelemetryLoggerPropertyBag)[] = [];
             properties.push(this.properties.all);
             if (includeErrorProps) {
@@ -216,6 +285,10 @@ export abstract class TelemetryLogger implements ITelemetryLogger {
             }
         }
         return newEvent;
+    }
+
+    public sendGeneralUseEvent(event: ITelemetryGeneralUseEvent, error?: any): void {
+        this.sendTelemetryEventCore({ ...event }, error, true);
     }
 }
 
@@ -344,8 +417,8 @@ export class ChildLogger extends TelemetryLogger {
      *
      * @param event - the event to send
      */
-    public send(event: ITelemetryBaseEvent): void {
-        this.baseLogger.send(this.prepareEvent(event));
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
+        this.baseLogger.send(this.prepareEvent(event, skipPropPrep));
     }
 }
 
@@ -384,8 +457,8 @@ export class MultiSinkLogger extends TelemetryLogger {
      *
      * @param event - the event to send to all the registered logger
      */
-    public send(event: ITelemetryBaseEvent): void {
-        const newEvent = this.prepareEvent(event);
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
+        const newEvent = this.prepareEvent(event, skipPropPrep);
         this.loggers.forEach((logger: ITelemetryBaseLogger) => {
             logger.send(newEvent);
         });
@@ -529,7 +602,7 @@ export class PerformanceEvent {
  * It can be used in places where logger instance is required, but events should be not send over.
  */
 export class TelemetryUTLogger implements ITelemetryLogger {
-    public send(event: ITelemetryBaseEvent): void {
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
     }
     public sendTelemetryEvent(event: ITelemetryGenericEvent, error?: any) {
     }
@@ -543,6 +616,8 @@ export class TelemetryUTLogger implements ITelemetryLogger {
     }
     public logException(event: ITelemetryErrorEvent, exception: any): void {
         this.reportError("exception in UT logger!", event, exception);
+    }
+    public sendGeneralUseEvent(event: ITelemetryGeneralUseEvent, error?: any): void {
     }
     public debugAssert(condition: boolean, event?: ITelemetryErrorEvent): void {
         this.reportError("debugAssert in UT logger!");
@@ -572,7 +647,7 @@ export class BaseTelemetryNullLogger implements ITelemetryBaseLogger {
      *
      * @param event - the event to send
      */
-    public send(event: ITelemetryBaseEvent): void {
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
         return;
     }
 }
@@ -582,8 +657,9 @@ export class BaseTelemetryNullLogger implements ITelemetryBaseLogger {
  * It can be used in places where logger instance is required, but events should be not send over.
  */
 export class TelemetryNullLogger implements ITelemetryLogger {
-    public send(event: ITelemetryBaseEvent): void {}
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {}
     public sendTelemetryEvent(event: ITelemetryGenericEvent, error?: any): void {}
     public sendErrorEvent(event: ITelemetryErrorEvent, error?: any): void {}
     public sendPerformanceEvent(event: ITelemetryPerformanceEvent, error?: any): void {}
+    // public sendGeneralUseEvent(event: ITelemetryGeneralUseEvent, error?: any): void {}
 }

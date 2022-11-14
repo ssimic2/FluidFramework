@@ -28,9 +28,11 @@ export abstract class BaseFileLogger implements IFileLogger {
         protected readonly defaultProps?: Record<string, string | number>,
     ) { }
 
-    public send(event: ITelemetryBaseEvent): void {
-        // eslint-disable-next-line no-param-reassign
-        event = { ...event, ...this.defaultProps };
+    public send(event: ITelemetryBaseEvent, skipPropPrep?: boolean): void {
+        if (!skipPropPrep) {
+             // eslint-disable-next-line no-param-reassign
+            event = { ...event, ...this.defaultProps };
+        }
         this.events.push(event);
 
         if (this.events.length >= this.eventsPerFlush || event.category === "error") {
